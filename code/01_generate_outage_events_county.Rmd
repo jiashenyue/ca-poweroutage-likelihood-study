@@ -208,7 +208,7 @@ for (f in 1:n_long_form){
 - Write to external file
 ```{r}
 write.csv(df_out,
-          here("result",
+          here("result","power-outage-events",
                "ca_cnty_pct_housing_unit_oop_new_def_2017_2022.csv"),
           row.names = FALSE)
 ```

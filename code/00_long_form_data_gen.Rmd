@@ -170,7 +170,7 @@ ca_data <- ca_data %>%
   group_by(UtilityName, StateName, CountyName, CityName) %>% 
   mutate(total_minutes = as.integer(difftime(lead(date), date))) %>%
   mutate(total_minutes = ifelse(is.na(total_minutes), 
-                                as.integer(difftime(lubridate::ymd_hm("2020-01-01 00:00"), date)), 
+                                as.integer(difftime(lubridate::ymd_hm("2021-01-01 00:00"), date)), 
                                 total_minutes)
   )
 ```
@@ -188,7 +188,7 @@ return_county_longform <- function(df, county_name = county_name) {
       select(UtilityName, StateName, CountyName, CityName),
       date = seq(
         from = as.POSIXct("2017-01-01 00:00", tz = "UTC"),
-        to = as.POSIXct("2019-12-31 23:50", tz = "UTC"),
+        to = as.POSIXct("2020-12-31 23:50", tz = "UTC"),
         by = "10 min"
       ))
   
