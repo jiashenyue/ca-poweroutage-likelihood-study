@@ -1,6 +1,6 @@
 # Likelihood of experiencing a wildfire-induced power outage in California
 
-Shenyue Jia
+Shenyue Jia | Initiatied on 11/22/2023
 
 A study on the likelihood of experiencing a wildfire-induced power outage in California
 
