@@ -10,7 +10,7 @@ The original data from [poweroutage.us](https://poweroutage.us/) are scrapped fr
   - Long form for each county
     - Each 10-min interval contains the number of customers who are out of power within the county
     - Generates data as CSV files
-    - [R notebook](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/00_long_form_data_gen.nb.html)
+    - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/00_long_form_data_gen.nb.html)
   - Long form for each city
     - City here means census-designated place (CDP), a geographical unit used by U.S. Census Bureau for populous areas
     - Each 10-min interval contains the number of customers who are out of power within the city (CDP)
