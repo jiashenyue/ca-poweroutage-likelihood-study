@@ -37,3 +37,15 @@ Ambient power outages occur often and not all of them are qualified as a power o
   - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/1euIYXlou6gmibB6_ViDBpanbjQJPrvlc?usp=drive_link)
     - One CSV file contains all events at city (CDP) level for each county in California
 
+### Pending questions to answer
+
+- A number of cities were lost in data processing as some cities' name cannot be matched with any CDP names, thus cannot have the total housing unit number with it.
+- The number of power outage events that last at least 60 min is very small at the city (CDP) level. Not sure if it is related to the loss of city (CDP) level data mentioned above.
+  - In contrast, power outage events that last at least 60 min are much more common at the county level. Below is an example:
+    - Amador County has 41 county-level power outage events that are at least 60 min long from 2017 to 2020
+    - Amador County has 0 city (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
+  - **This needs a more careful investigation**
+
+## Power outages caused by wildfires
+
+## Power outages caused by PSPS
