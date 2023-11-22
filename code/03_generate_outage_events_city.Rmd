@@ -1,0 +1,234 @@
+---
+title: "Generate power outage events at city level from long form data"
+author: "Shenyue Jia"
+output: html_notebook
+---
+
+
+This notebook shows how to separate long form of time series into power outage events.
+Power outage event is defined as a power outage last longer than 10 min and affects more than 0.5% customers in the area of interest.
+
+Reference
+Do, V., McBrien, H., Flores, N.M. et al. Spatiotemporal distribution of power outages with climate events and social vulnerability in the USA. Nat Commun 14, 2470 (2023). https://doi.org/10.1038/s41467-023-38084-6
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(viridis)
+library(classInt)
+```
+
+- Clean work space.
+```{r}
+rm(list = ls())
+```
+
+# Obtain housing unit data at CDP level
+
+- Customers are defined as housing units in this work.
+
+```{r}
+if(any(grepl("package:plyr", search()))) detach("package:plyr",unload = TRUE) else message("plyr not loaded")
+
+total_hh <- read.csv(here(
+  "data_private",
+  "housing-units-cdp-2020-cnty-names-california.csv"),stringsAsFactors = FALSE)
+total_hh %>% DT::datatable(rownames = FALSE)
+```
+
+# Fill missing values
+
+- Obtain long form file names
+
+```{r}
+long_form_fnames <- list.files(path = here("result",
+                                           "long_form_missing_flg_fixed_city"),
+                               pattern = "\\.RDS$")
+
+n_long_form <- length(long_form_fnames)
+```
+
+- Function to separate long form time series into power outage events
+    - Detailed steps are described in the comments of code block
+
+```{r}
+generate_tile_plot_df <- function(long_form,customers_out,curr_total_hh){
+  
+  param_grid <- expand.grid(
+    c_out = customers_out
+  )
+
+  for (i in 1:NROW(customers_out)){
+
+    # If Customer out of power = 0, use a different condition to filter the subset data
+    if (param_grid$c_out[i] == 0){
+      long_form %>%
+        filter(CustomersOut == param_grid$c_out[i]) -> curr_ts
+      
+      
+    }else{
+      long_form %>%
+        filter(CustomersOut >= param_grid$c_out[i],
+        ) -> curr_ts
+      
+    }
+    
+
+    # Obtain flags to separate the entire time series 
+    # 1) if the time stamp is not consecutive (b/c the curr_ts is a subset from the long-form)
+    # curr_ts$FlagCustomer <- c(0,diff(curr_ts$CustomersOut_Sum)) != 0
+    # Note that this is different from the previous vesion
+    # of script, which also judges if there is a change in customer out
+    
+    curr_ts$FlagTime <- c(10,diff(curr_ts$date)) > 10
+    
+    # Combine the two flags to get a general flag to separate the curr_ts into segments
+    # Each segment contains the same number of customers out of power & the timestamps are consecutive
+    curr_ts <- curr_ts %>%
+      mutate(Flag = ifelse((FlagTime),TRUE,FALSE)) %>%
+      select(-FlagTime)
+    
+    n_seg <- length(which(curr_ts$Flag))+1
+    
+    curr_ts$SegID <- NA
+    curr_ts$SegID[which(curr_ts$Flag)] <- seq(1:n_seg)
+    
+    # Add back the first flag to the first row of curr_ts
+    curr_ts$SegID[1] <- 0
+    curr_ts$SegID = curr_ts$SegID+1
+    curr_ts$SegID <- as.factor(curr_ts$SegID)
+    
+    # Number of segments (n_seg) = the number of consecutive rows with 
+    # more than 0.5% total customers out of power (customers_out, varies)
+    # by county
+    # This value varies between each parameter combo
+    
+    curr_ts$NumSeg <- n_seg
+    
+    # Fill the segment ID
+    curr_ts <- curr_ts %>% fill(SegID)
+    
+    # Record the maximum # of customer during the outage 
+    # and the total minutes of duration (sum of segments * 10 min)
+    # Duration in curr_ts = minutes of outage
+    curr_ts <- curr_ts %>%
+      group_by(SegID) %>%
+      mutate(SegCustomerOut = max(CustomersOut,na.rm = TRUE),
+             Duration = 10*n(),
+             CustomerMinutes = sum(CustomersOut,na.rm = TRUE)*
+               Duration)
+    
+    curr_ts <- curr_ts %>%
+      group_by(SegID) %>%
+      summarize(SegID = first(SegID),
+                SegCustomerOut = first(SegCustomerOut),
+                SegCustomerMinutes = first(CustomerMinutes),
+                Duration = first(Duration),
+                Start = first(date),
+                End = last(date)+ms("9:59")) %>%
+      mutate(CustomerThres = param_grid$c_out[i])
+    
+    # Calculate % of total housing units who have experienced power outage
+    # Calculte % of time of the year when a power outage have occurred
+    curr_ts <- curr_ts %>%
+      mutate(PctHU = SegCustomerOut/curr_total_hh*100,
+             PctTime = Duration/525600*100,
+             TotalHU = curr_total_hh)
+    
+    # Drop unrealistic segmentations with % HU out of power > 100
+    curr_ts <- curr_ts %>%
+      filter(PctHU<100)
+    
+  }
+  
+  return(curr_ts)
+}
+
+```
+
+- Loop over each county to convert long form data to power outage events
+
+```{r}
+
+for (f in 1:n_long_form){
+  
+  if(any(grepl("package:plyr", search()))) 
+      detach("package:plyr",unload = TRUE) 
+    else 
+        message("plyr not loaded")
+
+  
+  # Read long form data of all CDP by county
+  long_form <- readRDS(here(
+    "result",
+    "long_form_missing_flg_fixed_city",
+    long_form_fnames[f]))
+  
+  curr_county <- substr(long_form_fnames[f],1,nchar(long_form_fnames[f])-14)
+  
+  # Add total housing unit number of each city for current county
+  long_form_hh <- long_form %>%
+      left_join(total_hh %>%
+                    select(total.housing.units,NAME10,COUNTY_NAME) %>%
+                    filter(COUNTY_NAME == curr_county),
+                by=c("CityName"="NAME10")) %>%
+      select(!c("COUNTY_NAME")) %>%
+      filter(!is.na(total.housing.units))
+  
+  rm(long_form)
+  
+  # Get names of CDP for current county
+  cdp_names <- unique(long_form_hh$CityName)
+  
+  if(length(cdp_names) != 0){
+      
+    for (cdp in 1:length(cdp_names)){
+      
+      curr_cdp <- cdp_names[cdp]
+       # Get housing unit information from county level data `total_hh`
+      curr_cdp_long_form <- long_form_hh[startsWith(long_form_hh$CityName,curr_cdp),]
+      curr_total_hh <- curr_cdp_long_form$total.housing.units[1]
+      
+      # Get the new definition of outage:
+      # Customers out = 0.5% of total households in the unit of analysis
+      customers_out <- ifelse(round(curr_total_hh*0.005,0)<500,
+                              500,
+                              round(curr_total_hh*0.005,0))
+      
+      print(paste0("Working on ",curr_cdp,", ",curr_county," County"))
+      
+      curr_df <- generate_tile_plot_df(curr_cdp_long_form,
+                                            customers_out,curr_total_hh)
+  
+      # Prepare saving to external file
+      # Binding results for each county together
+  
+      col_names <- names(curr_df)
+      curr_df <- bind_cols(curr_cdp,curr_county,curr_df)
+      names(curr_df) <- c("CDP","County",col_names)
+      if(cdp == 1){
+        df_out <- curr_df
+      }else{
+        df_out <- bind_rows(df_out,curr_df)
+      } 
+  }
+  
+    write.csv(df_out,
+          here("result","power-outage-events-city",
+               paste0(curr_county,"_cdp_pct_housing_unit_oop_new_def_2017_2022.csv")),
+          row.names = FALSE)
+      
+  }
+  
+
+
+  
+}                               
+
+```

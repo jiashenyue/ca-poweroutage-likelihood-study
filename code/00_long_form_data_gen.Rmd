@@ -1,0 +1,267 @@
+---
+title: "Prepare long forms of power outage data"
+author: "Shenyue Jia"
+output: html_notebook
+---
+
+
+This notebook shows how to convert the original dataset purchased from poweroutage.us to long forms by county and city.
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(foreign)
+library(here)
+library(bayestestR)
+```
+
+# Read original poweroutage.us CSV files
+
+```{r}
+rm(list = ls())
+```
+
+- Unzip file
+
+```{r}
+ca_data <- read_csv(unzip(here("data_private",
+                               "POUS_Export_Raw_CityByUtility_20170101_20201231.zip"),
+                          "POUS_Export_Raw_CityByUtility_20170101_20201231.csv")) %>%
+    filter(StateName == "California")
+
+head(ca_data)
+```
+
+# Fill missing values
+
+Fill some missing values using the following rules:
+
+-   "Los Angeles Department of Water & Power" = "Los Angeles"
+-   "Pasadena Water and Power" = "Los Angeles"
+-   "Riverside Public Utilities Department" = "Riverside"
+-   "Sacramento Municipal Utility District" = "Sacramento"
+-   "San Diego Gas & Electric" = "San Diego"
+
+```{r}
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "Los Angeles Department of Water & Power")] <- "Los Angeles"
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "Pasadena Water and Power")] <- "Los Angeles"
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "Riverside Public Utilities Department")] <- "Riverside"
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "Sacramento Municipal Utility District")] <- "Sacramento"
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "San Diego Gas & Electric")] <- "San Diego"
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown" &
+                           ca_data$UtilityName == "Imperial Irrigation District")] <- "Imperial"
+
+```
+
+Check how many rows still have `CountyName` as `Unknown`.
+
+```{r}
+ca_data %>%
+  subset(CountyName == "Unknown") %>%
+  group_by(UtilityName) %>%
+  summarize(count = n())
+```
+
+# Fix missing value of `CountyName` field with CDP data
+
+Use census designated places (CDP) data to match `CityName`
+
+```{r}
+cdp <- read.csv(
+  here(
+    "data_private",
+    "CDPs_County_Names.csv"
+  )
+)
+
+cdp <- cdp %>%
+  select(NAME10,COUNTY_NAME)
+
+
+ca_data <- left_join(ca_data,cdp,by = c("CityName" = "NAME10"))
+
+ca_data$CountyName[which(ca_data$CountyName == "Unknown")] <- 
+  as.character(ca_data$COUNTY_NAME[which(ca_data$CountyName == "Unknown")])
+
+ca_data <- ca_data %>%
+  select(-COUNTY_NAME)
+
+```
+
+Check how many rows still have `CountyName` as `Unknown`. This time we were able to fix all missing value issues in `CountyName` field.
+
+```{r}
+ca_data %>%
+  subset(CountyName == "Unknown") %>%
+  group_by(UtilityName) %>%
+  summarize(count = n())
+```
+
+# Obtain correct flags for start/end of power outage
+
+Flag missing values, replace them with NA, increment their time ---- Note that missing values will have *identical* time stamps; however the missing indicator means that the *next* API ping (ten minutes later) did not return a valid JSON. In other words, the timestamp of the missing value indicator is actually valid. We will put the missing value in the next ten- minute time slot.
+
+Some rows with missing data have the row returned a zero `CustomerOut` show up first. To correct this error, if a missing data problem is detected, assign both rows with the `CustomerOut` value (max among X and 0). Later in the script, assign the `CustomerOut` of the row marked as "missing" to 0
+
+Manually add a row if the last row in the group has a `CustomerOut`\>0 This extra row will be manipulated later to add the correct missing flag, and be assigned to zero. Zero will be carried over in the next step
+
+```{r}
+ca_data <- ca_data %>%
+  group_by(UtilityName, StateName, CountyName, CityName) %>%
+  group_modify(~ .x %>% 
+                 add_row(!!! map(.x, last)))
+
+ca_data <- ca_data %>%
+  group_by(UtilityName, StateName, CountyName, CityName, RecordedDateTime) %>%
+  mutate(missing = 0:(n() - 1),
+         CustomersOut = max(CustomersOut)) %>%
+  ungroup() %>%
+  mutate(
+    CustomersOut = ifelse(missing == 1, 0, CustomersOut),
+    datetime = ifelse(
+      missing == 1,
+      RecordedDateTime + lubridate::minutes(10),
+      RecordedDateTime
+    )
+  ) %>% 
+  mutate(datetime = lubridate::as_datetime(datetime))
+
+```
+
+-   Make ten-minute time intervals.
+
+```{r}
+ca_data <- ca_data %>%
+  mutate(
+    year = lubridate::year(datetime),
+    month = lubridate::month(datetime),
+    day =  lubridate::day(datetime),
+    hour = lubridate::hour(datetime),
+    minute = 10 * floor(lubridate::minute(datetime) / 10)
+  ) %>%
+  mutate(date = lubridate::ymd_hm(sprintf(
+    "%s-%s-%s %s:%s",
+    year,
+    month,
+    day,
+    hour,
+    minute
+  ))) %>% 
+  select(-datetime, -hour, -day, -month, -year, -missing)
+
+```
+
+-   Calculate total minutes
+
+```{r}
+ca_data <- ca_data %>% 
+  group_by(UtilityName, StateName, CountyName, CityName) %>% 
+  mutate(total_minutes = as.integer(difftime(lead(date), date))) %>%
+  mutate(total_minutes = ifelse(is.na(total_minutes), 
+                                as.integer(difftime(lubridate::ymd_hm("2020-01-01 00:00"), date)), 
+                                total_minutes)
+  )
+```
+
+# Generate long form of data
+
+- Function to generate a long form of data
+
+```{r}
+return_county_longform <- function(df, county_name = county_name) {
+  sub_df <- df %>% 
+    filter(CountyName == county_name)
+  
+  df_utility_info <- expand(sub_df %>%
+      select(UtilityName, StateName, CountyName, CityName),
+      date = seq(
+        from = as.POSIXct("2017-01-01 00:00", tz = "UTC"),
+        to = as.POSIXct("2019-12-31 23:50", tz = "UTC"),
+        by = "10 min"
+      ))
+  
+  sub_df_sub <- sub_df %>% select(date,CustomersOut)
+ 
+  res <- left_join(df_utility_info,
+                       sub_df %>%
+                       select(date,
+                              UtilityName,
+                              StateName,
+                              CountyName,
+                              CityName,
+                              CustomersOut)
+  ) %>% 
+    arrange(UtilityName, StateName, CountyName, CityName, date)
+  
+  unique_combos <- res %>% 
+    select(-date, -CustomersOut) %>% 
+    distinct()
+  CustomersOutLOCF <- vector("list", NROW(unique_combos))
+  for (i in 1:NROW(unique_combos)) {
+    CustomersOutLOCF[[i]] <- res %>% 
+      filter(UtilityName == unique_combos$UtilityName[i],
+             StateName == unique_combos$StateName[i],
+             CountyName == unique_combos$CountyName[i],
+             CityName == unique_combos$CityName[i]
+      ) %>% 
+      pull(CustomersOut) %>% 
+      zoo::na.locf(na.rm = FALSE)
+  }
+  res$CustomersOut_NA <- unlist(CustomersOutLOCF)
+  
+  res <- res %>%
+      mutate(CustomersOut_NA = ifelse(is.na(CustomersOut_NA),0,
+                                      CustomersOut_NA))
+  
+  # res
+}
+
+```
+
+- Generate long form for each county in California
+
+```{r}
+county_names <- as.character(levels(as.factor(ca_data$CountyName)))
+n_county <- length(county_names)
+
+for (i in 1:n_county){
+  # i = 9
+  long_form <- return_county_longform(ca_data, county_names[i])
+
+  # Aggregate to county level
+  long_form_county <- long_form %>%
+      group_by(date) %>%
+      summarise(CountyName = first(CountyName),
+                CustomersOut = sum(CustomersOut_NA,na.rm = TRUE)) %>%
+      arrange(date,CountyName,CustomersOut)
+
+  print(paste("Writing",county_names[i],"Long Form"))
+  
+  # Save the aggregated version to CSV
+  write_csv(long_form_county, file = here(
+    "result",
+    "long_form_missing_flg_fixed_county",
+    paste0(county_names[i],"_long_form.csv")))
+  
+  # Save the city-level version as RDS format
+  saveRDS(long_form, file = here("result",
+                                 "long_form_missing_flg_fixed_city",
+                                 paste0(county_names[i],"_long_form.RDS")))
+  
+  
+}
+
+
+```

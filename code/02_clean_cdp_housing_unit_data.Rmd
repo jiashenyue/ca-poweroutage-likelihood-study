@@ -1,0 +1,59 @@
+---
+title: "Clean census-designated place total housing unit data"
+author: Shenyue Jia
+output: html_notebook
+---
+
+- This notebook includes steps to ensure the names of census-designated places (CDP) match with the format used in RDS data of city level.
+
+```{r setup, warning=FALSE}
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+```
+
+```{r}
+rm(list = ls())
+```
+
+- Read the table with CDP and county names and CDP housing units data
+```{r}
+df_cdp_cnty <- read_csv(here("data_private","CDPs_County_Names.csv"))
+df_cdp_hu <- read_csv(here("data_private","housing-units-cdp-2020-california.csv"))
+```
+
+- Inspect field names of both data frames
+```{r}
+head(df_cdp_cnty)
+```
+
+```{r}
+head(df_cdp_hu)
+```
+- Join two dataframes
+```{r}
+
+df_cdp_hu <- df_cdp_hu %>%
+    left_join(df_cdp_cnty,by=c("name"="NAMELSAD10"))
+```
+
+- Drop some irrelevant fields
+```{r}
+df_cdp_hu%>%
+    select(!c(OID_,Join_Count,TARGET_FID,FID_1,STATEFP10,PLACEFP10,PLACENS10,
+         NAME10,COUNTYNS))
+```
+
+- Drop unmatched rows
+```{r}
+df_cdp_hu <- df_cdp_hu %>%
+    filter(!is.na(GEOID))
+```
+
+- Write the new CDP housing unit data with county names
+```{r}
+write_csv(df_cdp_hu,file = 
+              here("data_private",
+                   "housing-units-cdp-2020-cnty-names-california.csv"))
+```
