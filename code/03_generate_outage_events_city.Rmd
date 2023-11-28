@@ -175,11 +175,31 @@ for (f in 1:n_long_form){
   # Add total housing unit number of each city for current county
   long_form_hh <- long_form %>%
       left_join(total_hh %>%
-                    select(total.housing.units,NAME10,COUNTY_NAME) %>%
-                    filter(COUNTY_NAME == curr_county),
-                by=c("CityName"="NAME10")) %>%
-      select(!c("COUNTY_NAME")) %>%
-      filter(!is.na(total.housing.units))
+                    select(total_housing_unit,name_place,name_county) %>%
+                    filter(name_county == curr_county),
+                by=c("CityName"="name_place", "CountyName"="name_county"))
+  
+  # Keep a dataframe for CDPs without a match for total housing units
+  if(f == 1){
+      df_cdp_not_matched = long_form_hh %>%
+          filter(is.na(total_housing_unit)) %>%
+          select(c(UtilityName,StateName,CountyName,CityName)) %>%
+          distinct()
+          
+  }else{
+      df_cdp_not_matched <- bind_rows(
+          df_cdp_not_matched,
+          long_form_hh %>%
+          filter(is.na(total_housing_unit)) %>%
+          select(c(UtilityName,StateName,CountyName,CityName)) %>%
+          distinct()
+      )
+  }
+  
+  # remove CDPs without a valid housing unit value
+  long_form_hh <- long_form_hh %>%
+      filter(!is.na(total_housing_unit))
+      
   
   rm(long_form)
   
@@ -193,7 +213,7 @@ for (f in 1:n_long_form){
       curr_cdp <- cdp_names[cdp]
        # Get housing unit information from county level data `total_hh`
       curr_cdp_long_form <- long_form_hh[startsWith(long_form_hh$CityName,curr_cdp),]
-      curr_total_hh <- curr_cdp_long_form$total.housing.units[1]
+      curr_total_hh <- curr_cdp_long_form$total_housing_unit[1]
       
       # Get the new definition of outage:
       # Customers out = 0.5% of total households in the unit of analysis
@@ -219,16 +239,16 @@ for (f in 1:n_long_form){
       } 
   }
   
-    write.csv(df_out,
+    write_csv(df_out,
           here("result","power-outage-events-city",
-               paste0(curr_county,"_cdp_pct_housing_unit_oop_new_def_2017_2022.csv")),
-          row.names = FALSE)
+               paste0(curr_county,"_cdp_pct_housing_unit_oop_new_def_2017_2020.csv")))
       
   }
-  
-
-
-  
 }                               
 
+```
+
+- Save CDPs without a match for total housing units
+```{r}
+write_csv(df_cdp_not_matched, here("result","cdp_no_hu_matched.csv"))
 ```

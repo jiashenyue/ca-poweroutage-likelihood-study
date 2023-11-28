@@ -19,8 +19,8 @@ rm(list = ls())
 
 - Read the table with CDP and county names and CDP housing units data
 ```{r}
-df_cdp_cnty <- read_csv(here("data_private","CDPs_County_Names.csv"))
-df_cdp_hu <- read_csv(here("data_private","housing-units-cdp-2020-california.csv"))
+df_cdp_cnty <- read_csv(here("data_private","CDPs_county_names_full.csv"))
+df_cdp_hu <- read_csv(here("data_private","CDPs_housing_units.csv"))
 ```
 
 - Inspect field names of both data frames
@@ -35,20 +35,26 @@ head(df_cdp_hu)
 ```{r}
 
 df_cdp_hu <- df_cdp_hu %>%
-    left_join(df_cdp_cnty,by=c("name"="NAMELSAD10"))
+    left_join(df_cdp_cnty,by=c("GEOID_short"="GEOID"))
 ```
 
 - Drop some irrelevant fields
 ```{r}
-df_cdp_hu%>%
-    select(!c(OID_,Join_Count,TARGET_FID,FID_1,STATEFP10,PLACEFP10,PLACENS10,
-         NAME10,COUNTYNS))
+df_cdp_hu <- df_cdp_hu%>%
+    select(STATEFP,PLACEFP,GEOID_short,NAME,NAMELSAD,COUNTYFP,GEOID_2,NAME_2,
+           NAMELSAD_2, total_housing_unit,owner_occupied,renter_occupied) %>%
+    rename(GEOID_place = GEOID_short,
+           name_place = NAME,
+           name_place_lsad = NAMELSAD,
+           GEOID_county = GEOID_2,
+           name_county = NAME_2,
+           name_county_lsad = NAMELSAD_2)
 ```
 
 - Drop unmatched rows
 ```{r}
 df_cdp_hu <- df_cdp_hu %>%
-    filter(!is.na(GEOID))
+    filter(!is.na(GEOID_place))
 ```
 
 - Write the new CDP housing unit data with county names

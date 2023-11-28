@@ -4,17 +4,171 @@ author: Shenyue Jia
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+This notebook aims to investigate the lack of power outage >= 60 min at the city level.
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
 
-```{r}
-plot(cars)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+```{r}
+rm(list = ls())
+```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+## Investigate Amador County as an example
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+- Amador County has 41 county-level power outage events that are at least 60 min long from 2017 to 2020
+- Amador County has 0 city (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
+- The lack of city-level power outage >= 60 min needs investigation
 
+### Check missing data issue
+
+- Read the original long-form of Amador county
+```{r}
+lf_amador_cdp <- readRDS(here("result","long_form_missing_flg_fixed_city",
+                              "Amador_long_form.RDS"))
+head(lf_amador_cdp)
+```
+
+- Check utility company names
+```{r}
+lf_amador_cdp %>%
+    select(UtilityName, CityName) %>%
+    distinct()
+```
+
+- Los Angeles Department of Water & Power and Silver Lake should not be included in the dataframe of `lf_amador_cdp`
+- Temporarily fix
+    - Remove all rows of this city from `lf_amador_cdp`
+
+```{r}
+lf_amador_cdp <- lf_amador_cdp %>%
+    filter(!UtilityName %in% c("Los Angeles Department of Water & Power"))
+
+lf_amador_cdp %>%
+    select(UtilityName, CityName) %>%
+    distinct()
+```
+
+- Check how many rows do not have total population
+
+```{r}
+# read in total housing unit number for CDPs
+total_hh <- read.csv(here(
+  "data_private",
+  "housing-units-cdp-2020-cnty-names-california.csv"),stringsAsFactors = FALSE)
+total_hh %>% DT::datatable(rownames = FALSE)
+```
+
+- Join the table and count the missing data rows
+```{r}
+long_form_hh <- lf_amador_cdp %>%
+      left_join(total_hh %>%
+                    select(total.housing.units,NAME10,COUNTY_NAME) %>%
+                    filter(COUNTY_NAME == 'Amador'),
+                by=c("CityName"="NAME10")) %>%
+      select(!c("COUNTY_NAME")) %>%
+      filter(!is.na(total.housing.units))
+
+head(long_form_hh)
+
+```
+
+- How many do not have a matched total population number?
+```{r}
+long_form_hh %>%
+    filter(is.na(total.housing.units)) %>%
+    distinct(UtilityName,CityName)
+```
+
+- Turns out there is no missing data issue in Amador County
+
+```{r}
+# clean the workspace
+rm(lf_amador_cdp,long_form_hh)
+```
+
+## Check the missing data issue for all countis in California
+
+- Investigate if there are obviously wrong match between `UtilityName` and `CountyName` based on the service area of each utility company in this
+
+
+```{r}
+# get all the file names
+long_form_fnames <- list.files(path = here("result",
+                                           "long_form_missing_flg_fixed_city"),
+                               pattern = "\\.RDS$")
+
+n_long_form <- length(long_form_fnames)
+```
+
+- Get all unique combinations of `UtilityName`, `CountyName`, `CityName`
+```{r}
+for (f in 1:n_long_form){
+  
+  if(any(grepl("package:plyr", search()))) 
+      detach("package:plyr",unload = TRUE) 
+    else 
+        message("plyr not loaded")
+
+  
+  # Read long form data of all CDP by county
+  long_form <- readRDS(here(
+    "result",
+    "long_form_missing_flg_fixed_city",
+    long_form_fnames[f]))
+  
+  curr_county <- substr(long_form_fnames[f],1,nchar(long_form_fnames[f])-14)
+  
+  print(paste('Working on',curr_county))
+  
+  # Add total housing unit number of each city for current county
+  cdp_no_hh_cnt <- long_form %>%
+      left_join(total_hh %>%
+                    select(total.housing.units,NAME10,COUNTY_NAME) %>%
+                    filter(COUNTY_NAME == curr_county),
+                by=c("CityName"="NAME10","CountyName" = "COUNTY_NAME")) %>%
+      # select(!c("COUNTY_NAME")) %>%
+      group_by(UtilityName,CountyName,CityName) %>%
+      summarise(no_cdp_hh = sum(is.na(total.housing.units)))
+  
+  rm(long_form)
+  
+  # Get names of CDP for current county
+  if(f == 1){
+      df_cdp_comb <- cdp_no_hh_cnt
+  }else{
+      df_cdp_comb <- bind_rows(df_cdp_comb,
+                               cdp_no_hh_cnt)
+  }
+  
+}  
+```
+
+- How many cities do not have a matched CDP total population?
+
+```{r}
+na_cdp_county <- df_cdp_comb %>%
+    group_by(CountyName) %>%
+    mutate(ncdp = n()) %>%
+    ungroup() %>%
+    filter(no_cdp_hh>0) %>%
+    group_by(UtilityName, CountyName) %>%
+    summarise(count = n(),
+              pct_cnt = round(count/ncdp,2)*100)
+```
+
+- Save the names of CDP without CDP total population
+```{r}
+na_cdp_names <- df_cdp_comb %>%
+    filter(no_cdp_hh>0) %>%
+    select(!c("no_cdp_hh"))
+
+write_csv(na_cdp_names, here("result","cdp_no_total_hh.csv"))
+```
