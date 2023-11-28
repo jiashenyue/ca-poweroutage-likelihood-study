@@ -54,6 +54,7 @@ Ambient power outages occur often and not all of them are qualified as a power o
 
 - Some cities in poweroutage.us data are **not** CDPs, thus cannot have a housing unit value to define a power outage event
   - Examples include neighborhoods of a big city, such as `Mar Vista` in `Los Angeles County`
+  - A [CSV file](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/cdp_no_hu_matched.csv) with all cities from poweroutage.us that cannot be joined with a CDP
 
 ## Power outages caused by wildfires
 
