@@ -38,8 +38,8 @@ Ambient power outages occur often and not all of them are qualified as a power o
     - One CSV file contains all events at the county-level for all California counties
     - One CSV file contains all events at least 60 min at the county-level for all California counties
   - City (CDP) level results
-    - [Power outage events at the city (CDP) level]()
-    - [Power outage events at the county level at least 60 min long]()
+    - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/14XeIl7lcYZ-nPM0jvvnJxhkD8S0rm2PH?usp=drive_link)
+    - [Power outage events at the county level at least 60 min long](https://drive.google.com/drive/folders/14EGFSjZY2wCXfcDVEBT9MYKlzeabJTXg?usp=drive_link)
     - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/05_generate_outage_events_city.nb.html)
       - A previous R notebook may have a mistake in applying the cut-off values for housing unit
     - One CSV file contains all events at city (CDP) level for each county in California
