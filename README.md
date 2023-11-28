@@ -34,7 +34,7 @@ Ambient power outages occur often and not all of them are qualified as a power o
   - [Power outage events at the county level](https://drive.google.com/drive/folders/1mD1S8xvQ_8K7czHtK3wyadoOMOudkvU0?usp=drive_link)
     - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/01_generate_outage_events_county.nb.html)
     - One CSV file contains all events at county level for all California counties
-  - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/1mA08GE6eyZQdll_UOKMaPbRzXCoXH9wL?usp=drive_link)
+  - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/1k_aXyadT98D4FRbBTB4SQ-9dQYJojwnt?usp=drive_link)
     - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/03_generate_outage_events_city.nb.html)
     - One CSV file contains all events at city (CDP) level for each county in California
 
@@ -44,8 +44,11 @@ Ambient power outages occur often and not all of them are qualified as a power o
 - The number of power outage events that last at least 60 min is very small at the city (CDP) level. Not sure if it is related to the loss of city (CDP) level data mentioned above.
   - In contrast, power outage events that last at least 60 min are much more common at the county level. Below is an example:
     - Amador County has 41 county-level power outage events that are at least 60 min long from 2017 to 2020
-    - Amador County has 0 city (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
+    - Amador County has 0 cities (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
   - **This needs a more careful investigation**
+- (Updated on 11/28) After checking the missing data issue thoroughly in the data, there is no mistake in the table join with census data to obtain a valid housing unit value to define if a power loss event qualifies as a power outage (0.5% total housing unit rule)
+- **Further consideration**
+  - A different definition for power outage might be needed for CDP level?
 
 ## Power outages caused by wildfires
 
