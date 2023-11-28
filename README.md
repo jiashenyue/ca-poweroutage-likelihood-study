@@ -10,10 +10,10 @@ The original data from [poweroutage.us](https://poweroutage.us/) are scrapped fr
 
 - R notebook to convert the original data to long-form (01/01/2017 - 12/31/2020)
   - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/00_long_form_data_gen.nb.html)
-  - [Long form for each county](https://drive.google.com/drive/folders/1b0bILkp9my5JmltP7ClQElAOHpCKPmR0?usp=drive_link)
+  - [Long form for each county](https://drive.google.com/drive/folders/1l6SpqOA_7cFBYzVVvuZyZJLr_2ZcGCY7?usp=drive_link)
     - Each 10-min interval contains the number of customers who are out of power within the county
     - Generates data as CSV files
-  - [Long form for each city](https://drive.google.com/drive/folders/1ajMaKQil3iylpplX7QvWvRRM0VEuZ7Sx?usp=drive_link)
+  - [Long form for each city](https://drive.google.com/drive/folders/1k_aXyadT98D4FRbBTB4SQ-9dQYJojwnt?usp=drive_link)
     - City here means census-designated place (CDP), a geographical unit used by U.S. Census Bureau for populous areas
     - Each 10-min interval contains the number of customers who are out of power within the city (CDP)
     - Generates data as [RDS files](https://www.r-bloggers.com/2016/12/remember-to-use-the-rds-format/) to save space and time
@@ -31,10 +31,10 @@ Ambient power outages occur often and not all of them are qualified as a power o
 - The threshold of power outage changes as the total number of customers changes in the area of interest
 
 - R notebook to identify power outage events (01/01/2017 - 12/13/2020)
-  - [Power outage events at the county level](https://drive.google.com/drive/folders/1elQSEklY-O42fImwmqdsXM64Nbjl9PtY?usp=drive_link)
+  - [Power outage events at the county level](https://drive.google.com/drive/folders/1mD1S8xvQ_8K7czHtK3wyadoOMOudkvU0?usp=drive_link)
     - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/01_generate_outage_events_county.nb.html)
     - One CSV file contains all events at county level for all California counties
-  - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/1euIYXlou6gmibB6_ViDBpanbjQJPrvlc?usp=drive_link)
+  - [Power outage events at the city (CDP) level](https://drive.google.com/drive/folders/1mA08GE6eyZQdll_UOKMaPbRzXCoXH9wL?usp=drive_link)
     - [R notebook](https://htmlpreview.github.io/?https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/code/03_generate_outage_events_city.nb.html)
     - One CSV file contains all events at city (CDP) level for each county in California
 
