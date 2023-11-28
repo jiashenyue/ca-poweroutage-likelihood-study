@@ -42,7 +42,7 @@ total_hh <- read.csv(here(
 total_hh %>% DT::datatable(rownames = FALSE)
 ```
 
-# Fill missing values
+# Generate power outage events
 
 - Obtain long form file names
 

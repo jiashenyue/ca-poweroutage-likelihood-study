@@ -325,3 +325,236 @@ geography/tl_rd22_06_place/tl_rd22_06_place.prj
 geography/tl_rd22_06_place/tl_rd22_06_place.dbf
 geography/tl_rd22_06_place/tl_rd22_06_place.cpg
 geography/.DS_Store
+result/power-outage-events-city-at-least-60min/.DS_Store
+result/power-outage-events-city-at-least-60min/Alameda_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Alpine_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Amador_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Butte_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Calaveras_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Colusa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Contra Costa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Del Norte_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/El Dorado_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Fresno_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Glenn_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Humboldt_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Imperial_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Inyo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Kern_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Kings_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Lake_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Lassen_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Los Angeles_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Madera_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Marin_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Mariposa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Mendocino_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Merced_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Mono_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Monterey_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Napa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Nevada_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Orange_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Placer_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Plumas_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Riverside_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Sacramento_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Benito_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Bernardino_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Diego_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Francisco_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Joaquin_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Luis Obispo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/San Mateo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Santa Barbara_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Santa Clara_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Santa Cruz_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Shasta_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Sierra_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Siskiyou_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Solano_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Sonoma_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Stanislaus_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Sutter_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Tehama_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Trinity_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Tulare_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Tuolumne_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Ventura_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Yolo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city-at-least-60min/Yuba_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Alameda_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Alpine_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Amador_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Butte_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Calaveras_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Colusa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Contra Costa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Del Norte_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/El Dorado_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Fresno_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Glenn_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Humboldt_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Imperial_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Inyo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Kern_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Kings_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Lake_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Lassen_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Los Angeles_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Madera_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Marin_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Mariposa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Mendocino_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Merced_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Mono_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Monterey_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Napa_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Nevada_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Orange_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Placer_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Plumas_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Riverside_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Sacramento_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Benito_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Bernardino_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Diego_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Francisco_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Joaquin_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Luis Obispo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/San Mateo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Santa Barbara_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Santa Clara_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Santa Cruz_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Shasta_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Sierra_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Siskiyou_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Solano_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Sonoma_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Stanislaus_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Sutter_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Tehama_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Trinity_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Tulare_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Tuolumne_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Ventura_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Yolo_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-city/Yuba_cdp_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/.DS_Store
+result/power-outage-events-county-at-least-60min/Alameda_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Alpine_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Amador_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Butte_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Calaveras_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Colusa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Contra Costa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Del Norte_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/El Dorado_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Fresno_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Glenn_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Humboldt_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Imperial_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Inyo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Kern_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Kings_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Lake_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Lassen_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Los Angeles_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Madera_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Marin_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Mariposa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Mendocino_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Merced_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Modoc_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Mono_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Monterey_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Napa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Nevada_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Orange_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Placer_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Plumas_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Riverside_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Sacramento_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Benito_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Bernardino_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Diego_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Francisco_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Joaquin_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Luis Obispo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/San Mateo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Santa Barbara_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Santa Clara_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Santa Cruz_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Shasta_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Sierra_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Siskiyou_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Solano_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Sonoma_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Stanislaus_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Sutter_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Tehama_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Trinity_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Tulare_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Tuolumne_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Ventura_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Yolo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county-at-least-60min/Yuba_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/.DS_Store
+result/power-outage-events-county/Alameda_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Alpine_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Amador_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Butte_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Calaveras_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Colusa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Contra Costa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Del Norte_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/El Dorado_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Fresno_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Glenn_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Humboldt_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Imperial_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Inyo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Kern_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Kings_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Lake_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Lassen_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Los Angeles_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Madera_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Marin_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Mariposa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Mendocino_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Merced_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Modoc_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Mono_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Monterey_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Napa_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Nevada_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Orange_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Placer_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Plumas_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Riverside_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Sacramento_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Benito_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Bernardino_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Diego_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Francisco_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Joaquin_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Luis Obispo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/San Mateo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Santa Barbara_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Santa Clara_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Santa Cruz_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Shasta_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Sierra_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Siskiyou_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Solano_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Sonoma_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Stanislaus_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Sutter_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Tehama_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Trinity_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Tulare_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Tuolumne_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Ventura_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Yolo_cnty_pct_housing_unit_2017_2020.csv
+result/power-outage-events-county/Yuba_cnty_pct_housing_unit_2017_2020.csv
