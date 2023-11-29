@@ -46,13 +46,13 @@ Ambient power outages occur often and not all of them are qualified as a power o
 
 ### Pending questions to answer
 
-[x] A number of cities were lost in data processing as some cities' names cannot be matched with any CDP names, thus cannot have the total housing unit number with it.
-[x] Investigate the small number of city-level power outage events
+- [x] A number of cities were lost in data processing as some cities' names cannot be matched with any CDP names, thus cannot have the total housing unit number with it.
+- [x] Investigate the small number of city-level power outage events
   - The number of power outage events that last at least 60 min is very small at the city (CDP) level. Not sure if it is related to the loss of city (CDP) level data mentioned above.
   - In contrast, power outage events that last at least 60 min are much more common at the county level. Below is an example:
     - Amador County has a large number of county-level power outage events that were at least 60 min long from 2017 to 2020
     - Amador County has 0 cities (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
-[ ] Some events are very long; need to check if this is related to any irregulars in the long-form data
+- [ ] Some events are very long; need to check if this is related to any irregulars in the long-form data
   - Example: The longest power outage event at county level for `Alameda County` lasted for `78510` min from `2020-09-03T22:20:00Z` to `2020-10-28T10:49:59Z`
     - This might be an issue in the long-form data
 
