@@ -62,6 +62,11 @@ Ambient power outages occur often and not all of them are qualified as a power o
 - Some cities in poweroutage.us data are **not** CDPs, thus cannot have a housing unit value to define a power outage event
   - Examples include neighborhoods of a big city, such as `Mar Vista` in `Los Angeles County`
   - A [CSV file](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/cdp_no_hu_matched.csv) with all cities from poweroutage.us that cannot be joined with a CDP
+- The current version of county and city-level events (updated on 11/28/23) uses a different method to extract power outage events. This needs to be evaluated carefully as the analysis goes further.
+  - Use `1` as the cutoff value to extract continuous segments in the time series as power outage events
+    - These events can be as short as 10 min
+  - Once all continuous time segments are extracted, apply city or county-level cutoff values (0.5% total customers) to remove events that have affected too few people to be qualified as a power outage
+  - For our analysis, we are only interested in events at least `60` min long. So another filter is applied to generate a new set of CSV files for events with `Duration` not shorter than `60` min. 
 
 ## Power outages caused by wildfires
 
