@@ -124,7 +124,14 @@ lf_cnty_clean_sum_wk <- lf_cnty_clean %>%
 - Remove week `00`
 ```{r}
 lf_cnty_clean_sum_wk <- lf_cnty_clean_sum_wk %>%
-    filter(!week %in% c('00','53'))
+    filter(!week %in% c('00','53') & ymd >= as.Date("2017-10-01"))
+```
+
+- Set the data of 2017 before the first non-zero value as `NA` as this dataset does not begin until Oct. 2017
+
+```{r}
+idx_nozero <- which(lf_cnty_clean_sum_wk$CustomersOut >0 )
+lf_cnty_clean_sum_wk <- lf_cnty_clean_sum_wk[idx_nozero[1]:idx_nozero[length(idx_nozero)],]
 ```
 
 ## Create calendar heatmap plot
@@ -173,7 +180,7 @@ lf_cnty_clean_sum_wk %>%
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
-  ggtitle("% Customers experiencing power outages in California") -> ca_heatmap
+  ggtitle("% Customers experiencing power outages in California each week") -> ca_heatmap
 
 ca_heatmap
 ```
