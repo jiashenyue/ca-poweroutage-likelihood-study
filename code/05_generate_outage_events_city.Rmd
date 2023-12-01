@@ -190,8 +190,13 @@ for (f in 1:n_long_form){
       curr_cdp_long_form <- long_form_hh[startsWith(long_form_hh$CityName,curr_cdp),]
       curr_total_hh <- curr_cdp_long_form$total_housing_unit[1]
       
-      # No limit on housing unit
-      customers_out <- 1
+      # # No limit on housing unit
+      # customers_out <- 1
+      
+      # Apply limit on housing unit
+      customers_out <- ifelse(round(curr_total_hh*0.005,0)<500,
+                              500,
+                              round(curr_total_hh*0.005,0))
       
       print(paste0("Working on ",curr_cdp,", ",curr_county," County"))
       
@@ -210,10 +215,10 @@ for (f in 1:n_long_form){
       } 
   }
     
-    # Apply 0.5% cutoff and correct the cutoff value
-    df_out <- df_out %>%
-        filter(PctHU > 0.05) %>%
-        mutate(CustomerThres = round(TotalHU*0.05,0))
+    # # Apply 0.5% cutoff and correct the cutoff value
+    # df_out <- df_out %>%
+    #     filter(PctHU > 0.05) %>%
+    #     mutate(CustomerThres = round(TotalHU*0.05,0))
     
     df_out_sub <- df_out %>%
           filter(Duration >= 60)

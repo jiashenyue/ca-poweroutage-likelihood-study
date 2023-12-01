@@ -1,0 +1,279 @@
+﻿Utility ,PSPS Start Date,PSPS End Date,County
+SDGE,10/20/17,10/21/17,San Diego
+SDGE,10/23/17,10/25/17,San Diego
+SDGE,12/5/17,12/11/17,San Diego
+SDGE,12/6/17,12/8/17,San Diego
+SDGE,12/9/17,12/11/17,San Diego
+SDGE,12/14/17,12/15/17,San Diego
+SDGE,1/27/18,1/29/18,San Diego
+SDGE,10/15/18,10/16/18,San Diego
+SDGE,11/11/18,11/15/18,San Diego
+SDGE,11/12/18,11/16/18,San Diego
+SDGE,10/10/19,10/11/19,San Diego
+SDGE,10/24/19,10/26/19,San Diego
+SDGE,10/29/19,10/31/19,San Diego
+SDGE,12/2/20,12/4/20,San Diego
+SDGE,12/7/20,12/9/20,San Diego
+SDGE,10/26/20,10/27/20,San Diego
+SCE,11/25/19,11/26/19,Mono
+SCE,11/25/19,11/26/19,Inyo
+SCE,11/25/19,11/26/19,San Bernardino
+SCE,11/25/19,11/26/19,Los Angeles
+SCE,10/27/19,10/30/19,Fresno 
+SCE,10/27/19,10/30/19,Inyo 
+SCE,10/27/19,10/30/19,Kern 
+SCE,10/27/19,10/30/19,Madera
+SCE,10/27/19,10/30/19,Mono 
+SCE,10/27/19,10/30/19,Orange 
+SCE,10/27/19,10/30/19,Riverside 
+SCE,10/27/19,10/30/19,Tulare 
+SCE,10/27/19,10/30/19,Tuolomne 
+SCE,10/27/19,10/30/19,Ventura 
+SCE,10/27/19,10/30/19,San Bernardino 
+SCE,10/27/19,10/30/19,Los Angeles 
+SCE,10/24/19,10/25/19,Kern 
+SCE,10/24/19,10/25/19,Los Angeles 
+SCE,10/24/19,10/26/19,Orange 
+SCE,10/24/19,10/25/19,Riverside 
+SCE,10/24/19,10/25/19,San Bernardino 
+SCE,10/24/19,10/25/19,Ventura 
+SCE,10/10/19,10/11/19,Los Angeles 
+SCE,10/10/19,10/11/19,Ventura 
+SCE,10/10/19,10/11/19,Riverside 
+SCE,10/10/19,10/11/19,San Bernardino 
+SCE,10/10/19,10/11/19,Kern 
+SCE,9/16/19,9/17/19,Inyo
+SCE,9/16/19,9/17/19,Mono
+SCE,12/23/20,12/24/20,Inyo 
+SCE,12/23/20,12/24/20,Kern 
+SCE,12/18/20,12/24/20,Los Angeles 
+SCE,12/23/20,12/24/20,Riverside 
+SCE,12/23/20,12/24/20,San Bernardino 
+SCE,12/19/20,12/24/20,Ventura 
+SCE,12/7/20,12/9/20,Inyo 
+SCE,12/7/20,12/9/20,Kern 
+SCE,12/7/20,12/9/20,Los Angeles 
+SCE,12/7/20,12/9/20,Riverside 
+SCE,12/7/20,12/9/20,San Bernardino 
+SCE,12/7/20,12/9/20,Ventura 
+SCE,12/7/20,12/9/20,Orange 
+SCE,12/2/20,12/4/20,Kern 
+SCE,12/2/20,12/4/20,Los Angeles 
+SCE,12/2/20,12/4/20,San Bernardino 
+SCE,12/2/20,12/4/20,Ventura 
+SCE,12/2/20,12/4/20,Orange 
+SCE,11/26/20,11/28/20,Kern 
+SCE,11/26/20,11/28/20,Los Angeles 
+SCE,11/26/20,11/28/20,San Bernardino 
+SCE,11/26/20,11/28/20,Ventura 
+SCE,11/26/20,11/28/20,Orange 
+SCE,10/26/20,10/28/20,Kern 
+SCE,10/26/20,10/28/20,Los Angeles 
+SCE,10/26/20,10/28/20,San Bernardino 
+SCE,10/26/20,10/28/20,Ventura 
+SCE,10/26/20,10/28/20,Orange 
+SCE,10/26/20,10/28/20,Riverside
+PG&E,10/14/18,10/16/18,Placer
+PG&E,10/14/18,10/16/18,El Dorado
+PG&E,10/14/18,10/17/18,Napa
+PG&E,10/14/18,10/16/18,Lake
+PG&E,10/14/18,10/16/18,Amador
+PG&E,6/8/19,6/9/19,Butte
+PG&E,6/8/19,6/9/19,Napa
+PG&E,6/8/19,6/9/19,Solano
+PG&E,6/8/19,6/9/19,Yuba
+PG&E,9/23/19,9/26/19,Yuba
+PG&E,9/23/19,9/24/19,Sacremento
+PG&E,9/23/19,9/26/19,El Dorado
+PG&E,9/23/19,9/26/19,Nevada
+PG&E,9/23/19,9/26/19,Butte
+PG&E,9/25/19,9/26/19,Napa
+PG&E,9/25/19,9/25/19,Sonoma
+PG&E,9/25/19,9/26/19,Placer
+PG&E,10/5/19,10/6/19,Butte
+PG&E,10/5/19,10/6/19,Yuba
+PG&E,10/5/19,10/6/19,Plumas
+PG&E,10/9/19,10/11/19,Amador
+PG&E,10/9/19,10/12/19,Butte
+PG&E,10/9/19,10/11/19,Calaveras
+PG&E,10/9/19,10/11/19,Colusa
+PG&E,10/9/19,10/11/19,Contra Costa 
+PG&E,10/9/19,10/11/19,El Dorado
+PG&E,10/9/19,10/11/19,Glenn
+PG&E,10/9/19,10/11/19,Humboldt
+PG&E,10/9/19,10/11/19,Lake
+PG&E,10/9/19,10/11/19,Marin
+PG&E,10/9/19,10/11/19,Mendocino
+PG&E,10/9/19,10/11/19,Napa
+PG&E,10/9/19,10/11/19,Placer
+PG&E,10/9/19,10/11/19,Nevada
+PG&E,10/9/19,10/11/19,Plumas
+PG&E,10/9/19,10/11/19,Shasta
+PG&E,10/9/19,10/11/19,Sierra
+PG&E,10/9/19,10/11/19,Solano
+PG&E,10/9/19,10/11/19,Sonoma
+PG&E,10/9/19,10/11/19,Tehama
+PG&E,10/9/19,10/11/19,Trinity
+PG&E,10/9/19,10/11/19,Yolo
+PG&E,10/9/19,10/11/19,Yuba
+PG&E,10/9/19,10/11/19,Alameda
+PG&E,10/9/19,10/11/19, Alpine 
+PG&E,10/9/19,10/11/19,Calaveras
+PG&E,10/9/19,10/11/19,Contra Costa
+PG&E,10/9/19,10/11/19,Mariposa
+PG&E,10/9/19,10/11/19,Mendocino
+PG&E,10/9/19,10/11/19,Merced
+PG&E,10/9/19,10/11/19,San Joaquin
+PG&E,10/9/19,10/11/19,Santa Clara
+PG&E,10/9/19,10/11/19,San Mateo
+PG&E,10/9/19,10/11/19,Santa Cruz
+PG&E,10/9/19,10/11/19,Stanislaus
+PG&E,10/9/19,10/11/19,Tuolumne
+PG&E,10/9/19,10/11/19,Siskiyou
+PG&E,10/10/19,10/11/19,Kern 
+PG&E,10/9/19,10/12/19,Sacremento
+PG&E,10/23/19,10/25/19,Sonoma
+PG&E,10/23/19,10/25/19,Lake
+PG&E,10/23/19,10/25/19,Napa
+PG&E,10/23/19,10/25/19,Mendocino
+PG&E,10/23/19,10/25/19,Sierra
+PG&E,10/23/19,10/25/19,Nevada
+PG&E,10/23/19,10/25/19,Placer
+PG&E,10/23/19,10/25/19,El Dorado
+PG&E,10/23/19,10/25/19,Amador
+PG&E,10/23/19,10/25/19,Yuba
+PG&E,10/23/19,10/25/19,Butte
+PG&E,10/23/19,10/25/19,San Mateo
+PG&E,10/23/19,10/25/19,Kern 
+PG&E,10/23/19,10/25/19,Calaveras
+PG&E,10/26/19,10/29/19,Sierra
+PG&E,10/26/19,10/29/19,Nevada
+PG&E,10/26/19,10/29/19,Placer
+PG&E,10/26/19,10/29/19,El Dorado
+PG&E,10/26/19,10/29/19,Amador
+PG&E,10/26/19,10/29/19,Calaveras
+PG&E,10/26/19,10/29/19,Tuolumne
+PG&E,10/26/19,10/29/19,Mariposa
+PG&E,10/26/19,10/29/19,Madera
+PG&E,10/26/19,10/29/19,Fresno
+PG&E,10/26/19,10/29/19,Yuba
+PG&E,10/26/19,10/29/19,Mendocino
+PG&E,10/26/19,10/29/19,Sonoma
+PG&E,10/26/19,10/29/19,Lake
+PG&E,10/26/19,10/29/19,Napa
+PG&E,10/26/19,10/29/19,Solano
+PG&E,10/26/19,10/29/19,Yolo
+PG&E,10/26/19,10/29/19,Tehama 
+PG&E,10/26/19,10/29/19,Shasta 
+PG&E,10/26/19,10/29/19,Monterey 
+PG&E,10/26/19,10/29/19,Tehama
+PG&E,10/26/19,10/29/19,Santa Cruz
+PG&E,10/26/19,10/29/19,Humboldt
+PG&E,10/26/19,10/29/19,Contra Costa
+PG&E,10/26/19,10/29/19,Alpine
+PG&E,10/26/19,10/29/19,Alameda
+PG&E,10/26/19,10/29/19,Trinity 
+PG&E,10/26/19,10/29/19,Kern 
+PG&E,11/20/19,11/21/19,Butte
+PG&E,11/20/19,11/21/19,Glenn
+PG&E,11/20/19,11/21/19,Colusa
+PG&E,11/20/19,11/21/19,Yolo
+PG&E,11/20/19,11/21/19,Lake
+PG&E,11/20/19,11/21/19,Napa
+PG&E,11/20/19,11/21/19,Sonoma
+PG&E,11/20/19,11/21/19,Mendocino
+PG&E,11/20/19,11/21/19,Tehama
+PG&E,11/20/19,11/21/19,Shasta
+PG&E,11/20/19,11/21/19,Solano
+PG&E,9/7/20,9/10/20,Humboldt
+PG&E,9/7/20,9/10/20,Trinity
+PG&E,9/7/20,9/10/20,Shasta
+PG&E,9/7/20,9/10/20,Lassen
+PG&E,9/7/20,9/10/20,Tehama
+PG&E,9/7/20,9/10/20,Butte
+PG&E,9/7/20,9/10/20,Plumes
+PG&E,9/7/20,9/10/20,Sierra
+PG&E,9/7/20,9/10/20,Nevada
+PG&E,9/7/20,9/10/20,Placer
+PG&E,9/7/20,9/10/20,Yuba
+PG&E,9/7/20,9/10/20,El Dorado
+PG&E,9/7/20,9/10/20,Amador
+PG&E,9/7/20,9/10/20,Calaveras
+PG&E,9/7/20,9/10/20,Tuolumne
+PG&E,9/7/20,9/10/20,Alpine
+PG&E,9/7/20,9/10/20,Napa
+PG&E,9/7/20,9/10/20,Sonoma
+PG&E,9/7/20,9/10/20,Kern 
+PG&E,9/27/20,9/29/20,Shasta
+PG&E,9/27/20,9/29/20,Tehama
+PG&E,9/27/20,9/29/20,Plumas
+PG&E,9/27/20,9/29/20,Sierra
+PG&E,9/27/20,9/29/20,Nevada
+PG&E,9/27/20,9/29/20,Placer
+PG&E,9/27/20,9/29/20,El Dorado
+PG&E,9/27/20,9/29/20,Alpine
+PG&E,9/27/20,9/29/20,Calaveras
+PG&E,9/27/20,9/29/20,Amador
+PG&E,9/27/20,9/29/20,Napa
+PG&E,9/27/20,9/29/20,Sonoma
+PG&E,9/27/20,9/29/20,Lake
+PG&E,9/27/20,9/29/20,Butte
+PG&E,9/27/20,9/29/20,Yuba
+PG&E,10/14/20,10/16/20,Shasta
+PG&E,10/14/20,10/16/20,Tehama
+PG&E,10/14/20,10/16/20,Butte
+PG&E,10/14/20,10/16/20,Sierra
+PG&E,10/14/20,10/16/20,Nevada
+PG&E,10/14/20,10/16/20,Placer
+PG&E,10/14/20,10/16/20,El Dorado
+PG&E,10/14/20,10/16/20,Amador
+PG&E,10/14/20,10/16/20,Calaveras
+PG&E,10/14/20,10/16/20,Humboldt
+PG&E,10/14/20,10/16/20,Trinity
+PG&E,10/14/20,10/16/20,Sonoma
+PG&E,10/14/20,10/16/20,Napa
+PG&E,10/14/20,10/16/20,San Mateo
+PG&E,10/14/20,10/16/20,Monterey 
+PG&E,10/14/20,10/16/20,Lake
+PG&E,10/14/20,10/16/20,Solano
+PG&E,10/14/20,10/16/20,Santa Cruz
+PG&E,10/14/20,10/16/20,Contra Costa
+PG&E,10/14/20,10/16/20,Santa Clara
+PG&E,10/14/20,10/16/20,Alameda
+PG&E,10/22/20,10/23/20,Shasta
+PG&E,10/22/20,10/23/20,Tehama
+PG&E,10/22/20,10/22/20,Glenn
+PG&E,10/22/20,10/23/20,Butte
+PG&E,10/22/20,10/23/20,Colusa
+PG&E,10/22/20,10/22/20,Yolo
+PG&E,10/22/20,10/22/20,Lake
+PG&E,10/25/20,10/27/20,Humboldt
+PG&E,10/25/20,10/27/20,Trinity
+PG&E,10/25/20,10/27/20,Shasta
+PG&E,10/25/20,10/27/20,Lassen
+PG&E,10/25/20,10/27/20,Mendocino
+PG&E,10/25/20,10/27/20,Glenn
+PG&E,10/25/20,10/27/20,Butte
+PG&E,10/25/20,10/27/20,Plumas
+PG&E,10/25/20,10/27/20,Sierra
+PG&E,10/25/20,10/27/20,Lake
+PG&E,10/25/20,10/27/20,Colusa
+PG&E,10/25/20,10/27/20,Nevada
+PG&E,10/25/20,10/27/20,Placer
+PG&E,10/25/20,10/27/20,El Dorado
+PG&E,10/25/20,10/27/20,Amador
+PG&E,10/25/20,10/27/20,Calaveras
+PG&E,10/25/20,10/27/20,Tuolumne
+PG&E,10/25/20,10/27/20,Madera
+PG&E,10/25/20,10/27/20,Sonoma
+PG&E,10/25/20,10/27/20,Marin
+PG&E,10/25/20,10/27/20,San Mateo
+PG&E,10/25/20,10/27/20,Santa Cruz
+PG&E,10/25/20,10/27/20,Alameda
+PG&E,10/25/20,10/27/20,Santa Clara
+PG&E,10/25/20,10/27/20,Stanislaus
+PG&E,10/25/20,10/27/20,Fresno
+PG&E,10/25/20,10/27/20,Alpine
+PG&E,10/25/20,10/27/20,Mariposa
+PG&E,12/2/20,12/3/20,Kern 
+Pacific Corp,9/13/20,9/13/20,Siskiyou

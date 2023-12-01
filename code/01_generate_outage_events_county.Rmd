@@ -160,7 +160,7 @@ for (f in 1:n_long_form){
   
   if(any(grepl("package:plyr", search()))) 
       detach("package:plyr",unload = TRUE) 
-    else 
+  else 
         message("plyr not loaded")
 
   
@@ -178,10 +178,10 @@ for (f in 1:n_long_form){
   
   # Get the new definition of outage:
   # Customers out = 0.5% of total households in the unit of analysis
-  # customers_out <- ifelse(round(curr_total_hh*0.005,0)<500,
-  #                         500,
-  #                         round(curr_total_hh*0.005,0))
-  customers_out <- 1
+  customers_out <- ifelse(round(curr_total_hh*0.005,0)<500,
+                          500,
+                          round(curr_total_hh*0.005,0))
+  # customers_out <- 1
   
   print(paste0("Working on ",curr_county," County"))
   
@@ -195,22 +195,22 @@ for (f in 1:n_long_form){
   curr_df <- bind_cols(curr_county,curr_df)
   names(curr_df) <- c("County",col_names)
   
-  # Apply 0.5% cutoff
-  curr_df_out <- curr_df %>%
-        filter(PctHU > 0.05) %>%
-      mutate(CustomerThres = round(TotalHU*0.05,0))
+  # # Apply 0.5% cutoff
+  # curr_df_out <- curr_df %>%
+  #       filter(PctHU > 0.05) %>%
+  #     mutate(CustomerThres = round(TotalHU*0.05,0))
     
-  curr_df_out_sub <- curr_df_out %>%
+  curr_df_out_sub <- curr_df %>%
           filter(Duration >= 60)
 
   if(f == 1){
-    df_out <- curr_df_out
+    df_out <- curr_df
   }else{
-    df_out <- bind_rows(df_out,curr_df_out)
+    df_out <- bind_rows(df_out,curr_df)
   }
   
 
-  write_csv(curr_df_out,
+  write_csv(curr_df,
           here("result","power-outage-events-county",
                paste0(curr_county,"_cnty_pct_housing_unit_2017_2020.csv")))
 
@@ -232,7 +232,7 @@ write_csv(df_out,
                "ca_cnty_pct_housing_unit_2017_2020.csv"))
 
 df_out_sub <- df_out %>%
-    mutate(CustomerThres = round(TotalHU*0.05,0))
+    filter(Duration >= 60)
 
 write_csv(df_out_sub,
           here("result",

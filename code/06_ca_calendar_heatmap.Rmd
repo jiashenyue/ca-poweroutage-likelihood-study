@@ -19,6 +19,13 @@ library(classInt)
 library(stringr)
 ```
 
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+
 ## Prepare data for plotting
 
 - All county-level power outages
@@ -170,8 +177,8 @@ lf_cnty_clean_sum_wk %>%
   ggplot(aes(x=week, y=year, fill= PctCustomerOut)) + 
   geom_tile(color = "white",size = 0.1)+
   scale_fill_distiller(palette = "YlGnBu",trans = "reverse",name="% Customers\nlost power",
-                       breaks = caculate_class(lf_cnty_clean_sum$PctCustomerOut,5),
-                       labels = caculate_class(lf_cnty_clean_sum$PctCustomerOut,5)) +
+                       breaks = caculate_class(lf_cnty_clean_sum$PctCustomerOut,4),
+                       labels = caculate_class(lf_cnty_clean_sum$PctCustomerOut,4)) +
   scale_x_discrete(breaks = week_breaks,
                    labels = week_labels) +
 

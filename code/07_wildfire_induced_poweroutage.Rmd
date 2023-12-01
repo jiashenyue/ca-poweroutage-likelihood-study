@@ -1,0 +1,228 @@
+---
+title: "Identify wildfire-induced events"
+author: Shenyue Jia
+output: html_notebook
+---
+
+## Introduction
+- This notebook produce a dataset with a new flag field to identify if a power outage event is wildfire-induced.
+- Wildfire-induced power outages
+    - Directly caused by wildfire progression
+    - Caused by Public Safety Power Shutoffs (PSPS)
+    - Power outages caused by PSPS usually have a much larger geographical extent and higher number of customers affected
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(stringr)
+```
+
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+## Get wildfire and PSPS events data
+### Process data of PSPS at county level
+```{r}
+psps_cnty <- read_csv(here("data_private",
+                           "psps-events-county-2017-2020.csv"))
+head(psps_cnty)
+```
+
+- Format `psps_cnty` start/end date
+```{r}
+psps_cnty <- psps_cnty %>%
+    mutate(`PSPS Start Date` = as.Date(`PSPS Start Date`, format = "%m/%d/%y"),
+           `PSPS End Date` = as.Date(`PSPS End Date`, format = "%m/%d/%y"))
+head(psps_cnty)
+```
+
+- Rename `psps_cnty` fields
+```{r}
+psps_cnty <- psps_cnty %>%
+    rename("psps_start" = "PSPS Start Date",
+           "psps_end" = "PSPS End Date")
+names(psps_cnty)
+```
+
+### Process wildfire data at county level
+```{r}
+fire_cnty <- read_csv(here("data_private",
+                           "ca-fire-2017-2022-place-name-county-name.csv"))
+head(fire_cnty)
+```
+
+- Select fields and format dates
+```{r}
+fire_cnty <- fire_cnty %>%
+    select(FIRE_NAME,ALARM_DATE,CONT_DATE,COUNTYFP,CNTY_FIPS,CNTY_NAME) %>%
+    rename("fire_start" = "ALARM_DATE",
+           "fire_end" = "CONT_DATE",
+           "County" = "CNTY_NAME")
+
+```
+
+- Make sure there is no duplicated fire event in `fire_cnty`
+```{r}
+fire_cnty <- fire_cnty %>%
+    distinct()
+head(fire_cnty)
+```
+
+
+
+### Obtain county-level power outage events
+
+```{r}
+df_outage <- read_csv(here("result",
+                           "ca_cnty_pct_housing_unit_at_least_60_min_2017_2020.csv"))
+head(df_outage)
+```
+
+- Add date-only fields for `df_outage`
+
+```{r}
+df_outage <- df_outage %>%
+    mutate(start_date = as.Date(Start),
+           end_date = as.Date(End),
+           event_id = seq(1:nrow(df_outage)))
+head(df_outage)
+```
+
+### Prepare a new `dataframe` to include all wildfire-related events
+```{r}
+df_fire_event_cnty <- bind_rows(
+    psps_cnty %>%
+        select(County, psps_start, psps_end) %>%
+        mutate(type = "PSPS") %>%
+        rename(start_date = psps_start,
+           end_date = psps_end),
+    fire_cnty %>%
+        select(County, fire_start, fire_end) %>%
+        rename(start_date = fire_start,
+               end_date = fire_end) %>%
+        mutate(type = "Wildfire")
+) %>%
+    arrange(County)
+head(df_fire_event_cnty)
+```
+
+## Identify county-level events using wildfire and PSPS info
+
+- A function to judge of one power outage event is wildfire-induced or not
+```{r}
+# Function to check if a date is within a given period
+is_date_within_period <- function(check_date, start_date, end_date) {
+  check_date >= start_date & check_date <= end_date
+}
+```
+
+- Loop to apply the function
+```{r}
+county_names <- unique(df_fire_event_cnty$County)
+
+for (i in 1:length(county_names)){
+    
+    print(paste("Processing",county_names[i]))
+    df_out <- df_outage %>%
+        filter(County == county_names[i]) %>%
+        arrange(start_date)
+    
+    df_fire <- df_fire_event_cnty %>%
+        filter(County == county_names[i]) %>%
+        arrange(start_date)
+    
+    for (j in 1:nrow(df_fire)){
+        
+        check_date <- df_fire$start_date[j]
+        type <- df_fire$type[j]
+        
+        # Check if the specific date is within any of the periods
+        result <- df_out %>%
+          mutate(
+            date_within_period = is_date_within_period(check_date, 
+                                                       start_date, 
+                                                       end_date),
+          ) %>%
+        filter(date_within_period == TRUE) %>%
+            mutate(type = type)
+        
+        # bind rows for final results
+        if (j == 1){
+            result_bind <- result
+        }else{
+            result_bind <- bind_rows(
+                result_bind,
+                result
+            )
+        }
+        
+    }
+    
+    if (i == 1){
+        df_fin <- result_bind
+    }else{
+        df_fin <- bind_rows(
+            df_fin,
+            result_bind
+        )
+    }
+        
+    
+}
+
+# remove some variables in the workspace
+rm(df_out, result, result_bind)
+```
+
+- Apply table join to also flag power outages events that are not associated with wildfires or PSPS
+
+```{r}
+df_fin <- df_fin %>%
+    select(event_id,date_within_period,type)
+
+df_outage <- df_outage %>%
+    left_join(df_fin, by = "event_id") %>%
+    mutate(date_within_period = ifelse(is.na(date_within_period),
+                                       "FALSE",date_within_period),
+           type = ifelse(is.na(type),"Not Wildfire-induced",
+                         type)) %>%
+    select(-event_id, -date_within_period)
+```
+
+### Produce a county-level events count data for wildfire-induced power outages
+
+- Remove the duplicated events again
+```{r}
+df_outage <- df_outage %>%
+    distinct()
+```
+
+- Total number of events in each type
+    - Wildfire
+    - PSPS
+    - Not wildfire-induced
+```{r}
+df_outage_cnty_cnt <- df_outage %>%
+    group_by(County, type) %>%
+    summarise(Count = n(),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              TotalDuration = sum(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration))
+```
+
+
+## Identify city-level events using city-level wildfire info
+
+## Identify city-level events using county-level wildfire info
