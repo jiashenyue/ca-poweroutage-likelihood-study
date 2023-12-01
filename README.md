@@ -2,7 +2,8 @@
 
 Shenyue Jia | Initiatied on 11/22/2023
 
-A study on the likelihood of experiencing a wildfire-induced power outage in California
+- A study on the likelihood of experiencing a wildfire-induced power outage in California
+- This work is an extension based on a [previous analysis](https://github.com/jiashenyue/ca-poweroutage-medical-vulnerable-pop/blob/main/README.md) focusing on the 2019 power outage events in California
 
 ## Convert the original poweroutage.us data to long-form
 
