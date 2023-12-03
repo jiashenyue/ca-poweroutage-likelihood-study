@@ -1,0 +1,278 @@
+---
+title: "Identify county-level wildfire-induced events"
+author: Shenyue Jia
+output: html_notebook
+---
+
+## Introduction
+- This notebook produce a dataset with a new flag field to identify if a power outage event at the CDP levelis wildfire-induced.
+- Wildfire-induced power outages
+    - Directly caused by wildfire progression
+    - Caused by Public Safety Power Shutoffs (PSPS)
+    - Power outages caused by PSPS usually have a much larger geographical extent and higher number of customers affected
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(stringr)
+```
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+## Obtain city-level wildfire-related events data
+
+### Obtain wildfire events data
+- Obtain cdp-level fire events
+```{r}
+fire_cdp <- read_csv(here("data_private",
+                     "ca-fire-2017-2022-place-name-county-name.csv"))
+head(fire_cdp)
+```
+
+```{r}
+fire_cdp <- fire_cdp %>%
+    select(CNTY_NAME,PLACE_FIPS, PLACE_NAME, PLACE_NAME_TYPE,
+           ALARM_DATE,CONT_DATE) %>%
+    rename("start_date" = "ALARM_DATE",
+           "end_date" = "CONT_DATE",
+           "county_name" = "CNTY_NAME",
+           "place_fips" = "PLACE_FIPS",
+           "place_name" = "PLACE_NAME",
+           "place_name_type" = "PLACE_NAME_TYPE") %>%
+    mutate(place_fips = paste0("0",place_fips),
+           type = "Wildfire") %>%
+    arrange(county_name,place_name)
+
+head(fire_cdp)
+
+```
+
+- Make sure there is no duplicated fire event in `fire_cdp`
+```{r}
+fire_cdp <- fire_cdp %>%
+    distinct()
+head(fire_cdp)
+```
+
+### Obtain PSPS events data at county level
+
+- The dataframe structure will be **different** than the `fire_cdp`
+    - No `place_fips`, `place_name`, `place_name_type`
+    
+```{r}
+psps_cnty <- read_csv(here("data_private","psps-events-county-2017-2020.csv"))
+head(psps_cnty)
+```
+
+- Format `psps_cnty` start/end date
+```{r}
+psps_cnty <- psps_cnty %>%
+    mutate(`PSPS Start Date` = as.Date(`PSPS Start Date`, format = "%m/%d/%y"),
+           `PSPS End Date` = as.Date(`PSPS End Date`, format = "%m/%d/%y"))
+head(psps_cnty)
+```
+
+- Rename fields and re-organized fields in `psps_cnty`
+```{r}
+psps_cnty <- psps_cnty %>%
+    rename("start_date" = "PSPS Start Date",
+           "end_date" = "PSPS End Date",
+           "county_name" = "County") %>%
+    mutate(type = "PSPS") %>%
+    select(county_name,start_date,end_date,type) %>%
+    arrange(county_name)
+names(psps_cnty)
+head(psps_cnty)
+```
+
+- Make sure there is no duplicated fire event in `psps_cnty`
+```{r}
+psps_cnty <- psps_cnty %>%
+    distinct()
+head(psps_cnty)
+```
+
+## Identify city-level events using city and county-level wildfire-related events
+
+- A function to judge of one power outage event is wildfire-induced or not
+```{r}
+# Function to check if a date is within a given period
+is_date_within_period <- function(check_date, start_date, end_date) {
+  check_date >= start_date & check_date <= end_date
+}
+```
+
+- Loop to apply the function and flag if an event is wildfire-induced or not
+- This time, we need to apply different treatment for PSPS and wildfire events as PSPS data is only available at **county** level
+
+### Check if any of the cdp-level event is wildfire-induced
+```{r}
+cdp_file_names <- list.files(here("result",
+                                  "power-outage-events-city-at-least-60min"),
+                             pattern = "\\.csv$", ignore.case = TRUE)
+county_names <- substr(cdp_file_names,1, 
+                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
+
+for (i in 1:length(county_names)){
+    
+    print(paste("Processing",county_names[i]))
+    
+    # Obtain data for city-level power outage
+    # City-level power outage data are organized by counties
+    
+    
+    df_outage <- read_csv(here("result",
+                               "power-outage-events-city-at-least-60min",
+                               paste(county_names[i],
+                                     "cdp_pct_housing_unit_2017_2020.csv",
+                                     sep = "_")))
+    
+    if(nrow(df_outage) > 0){
+            
+        df_outage <- df_outage %>% arrange(Start)
+    
+    
+        df_fire <- fire_cdp %>%
+                filter(county_name == county_names[i]) %>%
+                arrange(start_date, place_name)
+        
+        if(nrow(df_fin) > 0){
+           for (j in 1:nrow(df_fire)){
+                
+                check_date <- df_fire$start_date[j]
+                type <- df_fire$type[j]
+                
+                # Check if the specific date is within any of the periods
+                result <- df_outage %>%
+                  mutate(
+                    date_within_period = is_date_within_period(check_date, 
+                                                               Start, 
+                                                               End),
+                  ) %>%
+                filter(date_within_period == TRUE) %>%
+                    mutate(type = type)
+                
+                # bind rows for final results
+                if (j == 1){
+                    result_bind <- result
+                }else{
+                    result_bind <- bind_rows(
+                        result_bind,
+                        result
+                    )
+                }
+                
+            }
+            
+           if (i == 1){
+                df_fin <- result_bind
+            }else{
+                df_fin <- bind_rows(
+                    df_fin,
+                    result_bind
+                )
+            }    
+        }
+            
+
+        
+    }    
+        
+
+        
+    
+}
+
+# remove some variables in the workspace
+rm(df_out, result, result_bind)
+```
+
+### Check if any of the cdp-level event is PSPS-induced
+```{r}
+cdp_file_names <- list.files(here("result",
+                                  "power-outage-events-city-at-least-60min"),
+                             pattern = "\\.csv$", ignore.case = TRUE)
+county_names <- substr(cdp_file_names,1, 
+                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
+
+for (i in 1:length(county_names)){
+    
+    print(paste("Processing",county_names[i]))
+    
+    # Obtain data for city-level power outage
+    # City-level power outage data are organized by counties
+    
+    
+    df_outage <- read_csv(here("result",
+                               "power-outage-events-city-at-least-60min",
+                               paste(county_names[i],
+                                     "cdp_pct_housing_unit_2017_2020.csv",
+                                     sep = "_")))
+    
+    if(nrow(df_outage) > 0){
+            
+        df_outage <- df_outage %>% arrange(Start)
+    
+    
+        df_fire <- psps_cnty %>%
+                filter(county_name == county_names[i]) %>%
+                arrange(start_date, county_name)
+        
+        if(nrow(df_fin) > 0){
+           for (j in 1:nrow(df_fire)){
+                
+                check_date <- df_fire$start_date[j]
+                type <- df_fire$type[j]
+                
+                # Check if the specific date is within any of the periods
+                result <- df_outage %>%
+                  mutate(
+                    date_within_period = is_date_within_period(check_date, 
+                                                               Start, 
+                                                               End),
+                  ) %>%
+                filter(date_within_period == TRUE) %>%
+                    mutate(type = type)
+                
+                # bind rows for final results
+                if (j == 1){
+                    result_bind <- result
+                }else{
+                    result_bind <- bind_rows(
+                        result_bind,
+                        result
+                    )
+                }
+                
+            }
+            
+           if (i == 1){
+                df_fin <- result_bind
+            }else{
+                df_fin <- bind_rows(
+                    df_fin,
+                    result_bind
+                )
+            }    
+        }
+            
+
+        
+    }    
+        
+
+        
+    
+}
+
+# remove some variables in the workspace
+rm(df_out, result, result_bind)
+```

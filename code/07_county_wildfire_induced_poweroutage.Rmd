@@ -1,5 +1,5 @@
 ---
-title: "Identify wildfire-induced events"
+title: "Identify county-level wildfire-induced events"
 author: Shenyue Jia
 output: html_notebook
 ---
@@ -197,32 +197,30 @@ df_outage <- df_outage %>%
     select(-event_id, -date_within_period)
 ```
 
-### Produce a county-level events count data for wildfire-induced power outages
-
 - Remove the duplicated events again
 ```{r}
 df_outage <- df_outage %>%
     distinct()
 ```
 
-- Total number of events in each type
-    - Wildfire
-    - PSPS
-    - Not wildfire-induced
+<!-- - Total number of events in each type -->
+<!--     - Wildfire -->
+<!--     - PSPS -->
+<!--     - Not wildfire-induced -->
+<!-- ```{r} -->
+<!-- df_outage_cnty_cnt <- df_outage %>% -->
+<!--     group_by(County, type) %>% -->
+<!--     summarise(Count = n(), -->
+<!--               CustomerOut = sum(SegCustomerOut), -->
+<!--               CustomerMinutes = sum(SegCustomerMinutes), -->
+<!--               TotalDuration = sum(Duration), -->
+<!--               AvgDuration = mean(Duration), -->
+<!--               MedDuration = median(Duration), -->
+<!--               MaxDuration = max(Duration), -->
+<!--               MinDuration = min(Duration)) -->
+<!-- ``` -->
+### Saving county-level results as external files
+
 ```{r}
-df_outage_cnty_cnt <- df_outage %>%
-    group_by(County, type) %>%
-    summarise(Count = n(),
-              CustomerOut = sum(SegCustomerOut),
-              CustomerMinutes = sum(SegCustomerMinutes),
-              TotalDuration = sum(Duration),
-              AvgDuration = mean(Duration),
-              MedDuration = median(Duration),
-              MaxDuration = max(Duration),
-              MinDuration = min(Duration))
+write_csv(df_outage, here("result","county-outage-events-by-type.csv"))
 ```
-
-
-## Identify city-level events using city-level wildfire info
-
-## Identify city-level events using county-level wildfire info
