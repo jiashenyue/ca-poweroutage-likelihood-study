@@ -1,0 +1,227 @@
+---
+title: "Prepare aggregated data for power outage at county-level"
+author: Shenyue Jia
+output: html_notebook
+---
+
+This notebook prepared aggregated data from county-level power outage events. 
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(hrbrthemes)
+library(classInt)
+library(stringr)
+```
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+
+## Read county-level power outage data with type flag
+
+- Total number of events in each type
+    - Wildfire
+    - PSPS
+    - Not wildfire-induced
+
+```{r}
+df_outage <- read_csv(here("result","county-outage-events-by-type.csv"))
+```
+
+## Prepare aggregated results
+
+- Total count of events by county
+```{r}
+df_outage_cnty_cnt <- df_outage %>%
+    group_by(County, type) %>%
+    summarise(Count = n(),
+              TotalHU = first(TotalHU),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              MedCustomerMinutes = median(SegCustomerMinutes),
+              MinCustomerMinutes = min(SegCustomerMinutes),
+              MaxCustomerMinutes = max(SegCustomerMinutes),
+              AvgCustomerMinutes = mean(SegCustomerMinutes),
+              MedCustomerOut = median(SegCustomerOut),
+              MinCustomerOut = min(SegCustomerOut),
+              MaxCustomerOut = max(SegCustomerOut),
+              AvgCustomerOut = mean(SegCustomerOut),
+              TotalDuration = sum(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration),
+              PctCustomerOut = CustomerOut/(4*TotalHU),
+              PctDuration = round(TotalDuration/(525600*4),4)*100)
+```
+
+- Calculate the correct `pct_customer` out of power using 3*Total Housing Unit of each county
+
+```{r}
+df_hu <- df_outage %>%
+    group_by(County) %>%
+    summarise(TotalHU = first(TotalHU))
+head(df_hu)
+```
+
+```{r}
+ca_total_hu <- sum(df_hu$TotalHU)
+```
+
+
+```{r}
+write_csv(df_outage_cnty_cnt, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-2017-2020.csv"))
+```
+
+- Total count of events by months
+```{r}
+# add month field
+df_outage <- df_outage %>%
+    mutate(month = format(Start, "%b"),
+           month_num = format(Start, "%m"))
+head(df_outage)
+```
+
+- Aggregate `df_outage` by `month` and `County`
+```{r}
+df_outage_mon_agg <- df_outage %>%
+    group_by(month, County) %>%
+    summarise(Count = n(),
+              TotalHU = first(TotalHU),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              MedCustomerMinutes = median(SegCustomerMinutes),
+              MinCustomerMinutes = min(SegCustomerMinutes),
+              MaxCustomerMinutes = max(SegCustomerMinutes),
+              AvgCustomerMinutes = mean(SegCustomerMinutes),
+              MedCustomerOut = median(SegCustomerOut),
+              MinCustomerOut = min(SegCustomerOut),
+              MaxCustomerOut = max(SegCustomerOut),
+              AvgCustomerOut = mean(SegCustomerOut),
+              TotalDuration = sum(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              PctCustomerOut = CustomerOut/(4*TotalHU),
+              PctDuration = round(TotalDuration/(525600*4),4)*100)
+```
+
+```{r}
+write_csv(df_outage_mon_agg, here("result","county-aggregation-results",
+                                  "county-poweroutage-count-bymonth-2017-2020.csv"))
+```
+
+## Investigate events by `Duration`
+### Define cut-off values by `Duration`
+
+- Less than 8 hours
+- Less than 24 hours
+- Less than 72 hours
+
+```{r}
+df_outage <- df_outage %>%
+    mutate(duration_cate = 
+        case_when(Duration <= 8*60 ~ '<= 8 hours'
+                  ,Duration >8*60 & Duration <= 24*60 ~ '9-24 hours'
+                  ,Duration > 24*60 & Duration <= 72*60 ~ '25-72 hours'
+                  ,Duration >= 72*60 ~ '72+ hours'
+                  ,TRUE ~ 'Other'
+                  )
+        
+    )
+
+```
+
+### Aggregate by `month` and `duration_cate`
+
+- Aggregation over months
+```{r}
+df_outage_mon_dur_agg <- df_outage %>%
+    group_by(month, month_num, duration_cate) %>%
+    summarise(Count = n(),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              MedCustomerMinutes = median(SegCustomerMinutes),
+              MinCustomerMinutes = min(SegCustomerMinutes),
+              MaxCustomerMinutes = max(SegCustomerMinutes),
+              AvgCustomerMinutes = mean(SegCustomerMinutes),
+              MedCustomerOut = median(SegCustomerOut),
+              MinCustomerOut = min(SegCustomerOut),
+              MaxCustomerOut = max(SegCustomerOut),
+              AvgCustomerOut = mean(SegCustomerOut),
+              TotalDuration = sum(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              TotalDuration) %>%
+    arrange(month_num)
+```
+
+### Contribution of each type by month
+
+- Calculate the total power outage events by month
+```{r}
+df_tot_outage <- df_outage %>%
+    group_by(duration_cate) %>%
+    summarise(total_count = n())
+```
+
+- Join `df_tot_outage` with `df_outage`
+```{r}
+df_outage_mon_dur_agg <- df_outage_mon_dur_agg %>%
+    left_join(df_tot_outage, by = "duration_cate") %>%
+    mutate(event_pct_total = round(Count/total_count,4)*100)
+head(df_outage_mon_dur_agg)
+```
+
+- Save to external file
+```{r}
+write_csv(df_outage_mon_dur_agg, here("result","county-aggregation-results",
+                                      "state-poweroutage-count-bymonth-2017-2020.csv"))
+```
+
+## Investigate `type` (wildfire-induced or not)
+### Count of each type by `month` by `duration_cate`
+
+```{r}
+df_outag_mon_duration_type <- df_outage %>%
+    group_by(month_num,month,duration_cate, type) %>%
+    summarise(Count = n(),
+              TotalHU = first(TotalHU),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              MedCustomerMinutes = median(SegCustomerMinutes),
+              MinCustomerMinutes = min(SegCustomerMinutes),
+              MaxCustomerMinutes = max(SegCustomerMinutes),
+              AvgCustomerMinutes = mean(SegCustomerMinutes),
+              MedCustomerOut = median(SegCustomerOut),
+              MinCustomerOut = min(SegCustomerOut),
+              MaxCustomerOut = max(SegCustomerOut),
+              AvgCustomerOut = mean(SegCustomerOut),
+              TotalDuration = sum(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              PctCustomerOut = CustomerOut/(4*TotalHU),
+              PctDuration = round(TotalDuration/(525600*4),4)*100) %>%
+    arrange(month_num)
+```
+
+```{r}
+write_csv(df_outag_mon_duration_type,
+          here("result","county-aggregation-results",
+               "state-poweroutage-count-bymonth-type-2017-2020.csv"))
+```

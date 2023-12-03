@@ -1,0 +1,183 @@
+---
+title: "Map county-level power outage results"
+author: Shenyue Jia
+output: html_notebook
+---
+
+This notebook maps out a few county-level aggregation results.
+
+```{r setup, warning=FALSE, , message=FALSE}
+library(rstudioapi)
+library(tidyverse) # ggplot2, dplyr, tidyr, readr, purrr, tibble
+library(magrittr) # pipes
+library(lintr) # code linting
+library(sf) # spatial data handling
+library(viridis) # viridis color scale
+library(cowplot) # stack ggplots
+library(rmarkdown)
+library(here)
+library(hrbrthemes)
+library(ggExtra)
+library(rgeoda)
+```
+
+- Clean up workspace
+```{r}
+rm(list = ls())
+```
+
+## Prepare spatial data for mapping
+
+- Read Shapefiles of counties in California
+
+```{r}
+map_ca_county<- st_read(here("data_private",
+                             "ca_county_census_empower_UDSMapper_combined.shp"))
+
+names(map_ca_county)
+head(map_ca_county)
+```
+
+- Drop some unused fields
+```{r}
+map_ca_county <- map_ca_county %>%
+    select(STATEFP,COUNTYFP,GEOID,NAME)
+head(map_ca_county)
+```
+
+## Define a map theme
+```{r}
+theme_map <- function(...) {
+  theme_ipsum()+
+  theme(
+    # text = element_text(family = default_font_family,
+    #                     color = default_font_color),
+    # remove all axes
+    axis.line = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    # add a subtle grid
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    # background colors
+    plot.background = element_rect(
+      fill = NULL,
+                                   color = NA),
+    panel.background = element_rect(
+      fill = NULL,
+                                    color = NA),
+    legend.background = element_rect(
+      fill = NULL,
+                                     color = NA),
+    # borders and margins
+    plot.margin = unit(c(0,0,0,0), "cm"),
+    panel.border = element_blank(),
+    panel.spacing = unit(c(0,0,0,0), "cm"),
+    # titles
+    legend.title = element_text(size = 11),
+    legend.text = element_text(
+      # color = default_font_color,
+      size = 9, hjust = 0),
+    plot.title = element_text(
+      # color = default_font_color,
+    size = 15, hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5,
+                                 # color = default_font_color,
+                                 margin = margin(b = -0.1,
+                                                 t = -0.1,
+                                                 l = 2,
+                                                 unit = "cm"),
+                                 debug = F),
+    # captions
+    plot.caption = element_text(size = 7,
+                                hjust = .5,
+                                margin = margin(t = 0.2,
+                                                b = 0,
+                                                unit = "cm"),
+                                color = "#939184"),
+    ...
+  )
+}
+```
+
+- Prepare a function to create beautiful breaks
+```{r}
+  caculate_class <- function(var,nclass,style){
+    # library(plyr)
+    class_brks <- classIntervals(var, n = nclass,intervalClosure = "left",
+                                 style = style)
+    # class <- round_any(class_brks$brks,5)
+    class <- class_brks$brks
+    
+    return(class)
+  }
+```
+
+## Map count of power outage events by type at county-level
+
+- Read aggregated county results
+```{r}
+df_metric <- read_csv(here("result","county-aggregation-results",
+                           "county-poweroutage-count-2017-2020.csv"))
+head(df_metric)
+```
+
+- Join metrics to `map_ca_county`
+
+```{r}
+map_df_metric <- map_ca_county %>%
+    left_join(df_metric, by = c("NAME" = "County"))
+head(map_df_metric)
+```
+
+- Save to a Shapefile
+```{r}
+st_write(df_metric, here("result","geography","county-outage-bytype.shp"))
+```
+
+- Create a map with `map_df_metric`
+
+```{r}
+map_count <- map_df_metric %>%
+    ggplot()+
+    geom_sf(
+        aes(fill = Count),
+        color = "white", size = 0.05
+    )+
+    scale_fill_distiller(palette = "YlGnBu",trans = "reverse",name="Count",
+                       breaks = caculate_class(map_df_metric$Count,4,"jenks"),
+                       labels = caculate_class(map_df_metric$Count,4,"jenks"))+
+    # geom_sf(
+    #     fill = "transparent",
+    #     color = "white", size = 0.3
+    # )+
+    labs(x = NULL,
+         y = NULL,
+         title = "a) County-level power outages (2017-2020)")+
+    theme_map()
+map_count
+```
+
+```{r}
+map_cust_oop <- map_df_metric %>%
+    ggplot()+
+    geom_sf(
+        aes(fill = CustomerOut),
+        color = "white", size = 0.05
+    )+
+    scale_fill_distiller(palette = "YlGnBu",trans = "reverse",name="Customers\nOut of Power",
+                       breaks = caculate_class(map_df_metric$CustomerOut,4,"pretty"),
+                       labels = format(caculate_class(map_df_metric$CustomerOut,4,"pretty"),
+                                       big.mark = ","))+
+    # geom_sf(
+    #     fill = "transparent",
+    #     color = "white", size = 0.3
+    # )+
+    labs(x = NULL,
+         y = NULL,
+         title = "b) Accumulated customers out of power (2017-2020)")+
+    theme_map()
+map_cust_oop
+```
+- Bivariate map
