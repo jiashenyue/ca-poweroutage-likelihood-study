@@ -72,6 +72,10 @@ Ambient power outages occur often and not all of them are qualified as a power o
 
 ![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/01_ca_power_outage_calendar_heatmap.png)
 
+- [Maybe problematic and need more investigation] City-level power outage heatmap
+
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/02_ca_power_outage_city_level_calendar_heatmap.png)
+
 - Arbitrary numbers of customers out of power by county
 
 ![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/03_county-arbitrary-customers-duration-out-of-power.png)
