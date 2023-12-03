@@ -53,9 +53,11 @@ Ambient power outages occur often and not all of them are qualified as a power o
   - In contrast, power outage events that last at least 60 min are much more common at the county level. Below is an example:
     - Amador County has a large number of county-level power outage events that were at least 60 min long from 2017 to 2020
     - Amador County has 0 cities (CDP)-level power outage events that are at least 60 min long from 2017 to 2020
-- [ ] Some events are very long; need to check if this is related to any irregulars in the long-form data
+- [x] Some events are very long; need to check if this is related to any irregulars in the long-form data
   - Example: The longest power outage event at county level for `Alameda County` lasted for `78510` min from `2020-09-03T22:20:00Z` to `2020-10-28T10:49:59Z`
-    - This might be an issue in the long-form data
+    - This issue has been fixed by correctly applying the 0.5% customer threshold while cleaning the noise in the long-form time series
+- [ ] Using the current power outage definition, there are too few power outages at the **City** level
+- [ ] **None** of the wildfire or PSPS information matches the city-level outage events
 
 
 ### Other known issues
@@ -63,18 +65,16 @@ Ambient power outages occur often and not all of them are qualified as a power o
 - Some cities in poweroutage.us data are **not** CDPs, thus cannot have a housing unit value to define a power outage event
   - Examples include neighborhoods of a big city, such as `Mar Vista` in `Los Angeles County`
   - A [CSV file](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/cdp_no_hu_matched.csv) with all cities from poweroutage.us that cannot be joined with a CDP
-- The current version of county and city-level events (updated on 11/28/23) uses a different method to extract power outage events. This needs to be evaluated carefully as the analysis goes further.
-  - Use `1` as the cutoff value to extract continuous segments in the time series as power outage events
-    - These events can be as short as 10 min
-  - Once all continuous time segments are extracted, apply city or county-level cutoff values (0.5% total customers) to remove events that have affected too few people to be qualified as a power outage
-  - For our analysis, we are only interested in events at least `60` min long. So another filter is applied to generate a new set of CSV files for events with `Duration` not shorter than `60` min.
 
 ## Overall pattern of power outages
 
-- Based on data from `2017` to `2020`, most power outages events occurred in fall (late August to November)
+- Based on data from `2017` to `2020`, most power outage events occurred in the fall (late August to November)
 
 ![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/01_ca_power_outage_calendar_heatmap.png)
 
-## Power outages caused by wildfires
+## Wildfire-induced power outages at county level
 
-## Power outages caused by PSPS
+- [CSV file for county-level power outage events](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/county-outage-events-by-type.csv) with `type` equals to
+  - `Not Wildfire-induced`
+  - `Wildfire`
+  - `PSPS`
