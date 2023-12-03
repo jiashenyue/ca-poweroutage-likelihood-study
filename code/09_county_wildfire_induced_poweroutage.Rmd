@@ -113,45 +113,18 @@ is_date_within_period <- function(check_date, start_date, end_date) {
 - Loop to apply the function and flag if an event is wildfire-induced or not
 - This time, we need to apply different treatment for PSPS and wildfire events as PSPS data is only available at **county** level
 
-### Check if any of the cdp-level event is wildfire-induced
-```{r}
-cdp_file_names <- list.files(here("result",
-                                  "power-outage-events-city-at-least-60min"),
-                             pattern = "\\.csv$", ignore.case = TRUE)
-county_names <- substr(cdp_file_names,1, 
-                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
+- A function to judge if an event is wildfire-induced
 
-for (i in 1:length(county_names)){
-    
-    print(paste("Processing",county_names[i]))
-    
-    # Obtain data for city-level power outage
-    # City-level power outage data are organized by counties
-    
-    
-    df_outage <- read_csv(here("result",
-                               "power-outage-events-city-at-least-60min",
-                               paste(county_names[i],
-                                     "cdp_pct_housing_unit_2017_2020.csv",
-                                     sep = "_")))
-    
-    if(nrow(df_outage) > 0){
-            
-        df_outage <- df_outage %>% arrange(Start)
-    
-    
-        df_fire <- fire_cdp %>%
-                filter(county_name == county_names[i]) %>%
-                arrange(start_date, place_name)
-        
-        if(nrow(df_fin) > 0){
-           for (j in 1:nrow(df_fire)){
+```{r}
+wildfire_induced_events <- function(curr_county,
+                                    curr_df_outage, curr_df_fire){
+    for (j in 1:nrow(curr_df_fire)){
                 
-                check_date <- df_fire$start_date[j]
-                type <- df_fire$type[j]
+                check_date <- curr_df_fire$start_date[j]
+                type <- curr_df_fire$type[j]
                 
                 # Check if the specific date is within any of the periods
-                result <- df_outage %>%
+                result <- curr_df_outage %>%
                   mutate(
                     date_within_period = is_date_within_period(check_date, 
                                                                Start, 
@@ -170,109 +143,130 @@ for (i in 1:length(county_names)){
                     )
                 }
                 
-            }
-            
-           if (i == 1){
-                df_fin <- result_bind
-            }else{
-                df_fin <- bind_rows(
-                    df_fin,
-                    result_bind
-                )
-            }    
-        }
-            
+    }
+    
+    return(result_bind)
+    
+}
+```
 
+- Obtain cdp-level data for each county
+```{r}
+cdp_file_names <- list.files(here("result",
+                                  "power-outage-events-city-at-least-60min"),
+                             pattern = "\\.csv$", ignore.case = TRUE)
+county_names <- substr(cdp_file_names,1, 
+                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
+```
+
+
+### Check if any of the cdp-level event is wildfire-induced
+
+
+- Apply judge function for wildfire events
+
+```{r}
+for (i in 1:length(county_names)){
+    
+    print(paste("Processing",county_names[i]))
+    
+    # Obtain data for city-level power outage
+    # City-level power outage data are organized by counties
+
+    df_outage <- read_csv(here("result",
+                               "power-outage-events-city-at-least-60min",
+                               paste(county_names[i],
+                                     "cdp_pct_housing_unit_2017_2020.csv",
+                                     sep = "_")))
+    
+    if(nrow(df_outage)>0){
         
+        df_outage <- df_outage %>%
+            arrange(Start)
+        
+        df_fire <- fire_cdp %>%
+            filter(county_name == county_names[i]) %>%
+            arrange(start_date, county_name)
+        
+        if(nrow(df_fire)>0){
+            curr_result <- wildfire_induced_events(county_name[i],
+                                               df_outage,
+                                               df_fire)            
+        }
+        
+    # bind results for counties together
+    if(i==1){
+        out_df_wildfire <- curr_result
+    }else{
+        out_df_wildfire <- bind_rows(out_df_wildfire,
+                            curr_result)
     }    
         
 
         
+        
+        
+    }
+    
     
 }
 
-# remove some variables in the workspace
-rm(df_out, result, result_bind)
 ```
 
 ### Check if any of the cdp-level event is PSPS-induced
-```{r}
-cdp_file_names <- list.files(here("result",
-                                  "power-outage-events-city-at-least-60min"),
-                             pattern = "\\.csv$", ignore.case = TRUE)
-county_names <- substr(cdp_file_names,1, 
-                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
 
+- Apply the function to determine if a power outage event is a wildfire-induced one
+```{r}
 for (i in 1:length(county_names)){
     
     print(paste("Processing",county_names[i]))
     
     # Obtain data for city-level power outage
     # City-level power outage data are organized by counties
-    
-    
+
     df_outage <- read_csv(here("result",
                                "power-outage-events-city-at-least-60min",
                                paste(county_names[i],
                                      "cdp_pct_housing_unit_2017_2020.csv",
                                      sep = "_")))
     
-    if(nrow(df_outage) > 0){
-            
-        df_outage <- df_outage %>% arrange(Start)
-    
-    
+    if(nrow(df_outage)>0){
+        
+        df_outage <- df_outage %>%
+            arrange(Start)
+        
         df_fire <- psps_cnty %>%
-                filter(county_name == county_names[i]) %>%
-                arrange(start_date, county_name)
+            filter(county_name == county_names[i]) %>%
+            arrange(start_date, county_name)
         
-        if(nrow(df_fin) > 0){
-           for (j in 1:nrow(df_fire)){
-                
-                check_date <- df_fire$start_date[j]
-                type <- df_fire$type[j]
-                
-                # Check if the specific date is within any of the periods
-                result <- df_outage %>%
-                  mutate(
-                    date_within_period = is_date_within_period(check_date, 
-                                                               Start, 
-                                                               End),
-                  ) %>%
-                filter(date_within_period == TRUE) %>%
-                    mutate(type = type)
-                
-                # bind rows for final results
-                if (j == 1){
-                    result_bind <- result
-                }else{
-                    result_bind <- bind_rows(
-                        result_bind,
-                        result
-                    )
-                }
-                
-            }
-            
-           if (i == 1){
-                df_fin <- result_bind
-            }else{
-                df_fin <- bind_rows(
-                    df_fin,
-                    result_bind
-                )
-            }    
+        if(nrow(df_fire)>0){
+            curr_result <- wildfire_induced_events(county_name[i],
+                                               df_outage,
+                                               df_fire)            
         }
-            
-
         
+    # bind results for counties together
+    if(i==1){
+        out_df_psps <- curr_result
+    }else{
+        out_df_psps <- bind_rows(out_df_psps,
+                            curr_result)
     }    
         
 
         
+        
+        
+    }
+    
     
 }
 
-# remove some variables in the workspace
-rm(df_out, result, result_bind)
 ```
+
+## Note on results
+- Both `out_df_wildfire` and `out_df_psps` are empty, indicating no valid results are available and can be marked as PSPS or wildfire-induced.
+- This needs further investigation, including
+    - Checking the long form of time series
+    - Checking the threshold and other parameters applied to identify city-level events
+

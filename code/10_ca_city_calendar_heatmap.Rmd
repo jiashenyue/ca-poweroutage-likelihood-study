@@ -1,0 +1,231 @@
+---
+title: "Generate a calendar heatmap for all city-level power outages in California"
+output: html_notebook
+---
+
+This notebook generates a calendar heat map for all county-level and city-level power outage events in California from 2017 to 2020
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(hrbrthemes)
+library(classInt)
+library(stringr)
+```
+
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+
+## Prepare data for plotting
+
+- Bind rows of all events at city level
+```{r}
+cdp_file_names <- list.files(here("result",
+                                  "power-outage-events-city-at-least-60min"),
+                             pattern = "\\.csv$", ignore.case = TRUE)
+county_names <- substr(cdp_file_names,1, 
+                       (nchar(cdp_file_names)-nchar("_cdp_pct_housing_unit_2017_2020.csv")))
+
+here("result","power-outage-events-city-at-least-60min",
+                cdp_file_names) %>%
+    map_dfr(read_csv) -> df_cdp
+    
+```
+
+
+- Use the selected power outage info above and the long-form data to generate a new version of long-form data with customers out of power
+
+
+```{r}
+# Get cdp and county names
+county_cdp_names <- df_cdp %>%
+    distinct(CDP, County)
+county_names <- unique(county_cdp_names$County)
+```
+
+
+```{r}
+for (i in 1:length(county_names)){
+    
+    print(paste("Processing",county_names[i]))
+    curr_lf <- readRDS(here("result","long_form_missing_flg_fixed_city",
+                             paste0(county_names[i],"_long_form.RDS")))
+    
+    cdp_names <- county_cdp_names %>%
+        filter(County == county_names[i]) %>%
+        select(CDP)
+    cdp_names <- cdp_names$CDP
+    
+    # get a subset of power outage events
+    curr_oop <- df_cdp %>%
+        filter(County == county_names[i] & CDP %in% cdp_names)
+    
+    # subset long form to keep the selected power outage events
+    curr_lf_clean <- curr_lf %>%
+        mutate(CustomersOut = ifelse(date >= curr_oop$Start & date <= curr_oop$End,
+                                     CustomersOut, 0),
+               TotalHU = first(curr_oop$TotalHU))
+    
+    rm(curr_lf)
+    
+    if(i == 1){
+        lf_cnty_clean <- curr_lf_clean
+    }else{
+        lf_cnty_clean <- bind_rows(lf_cnty_clean,
+                                   curr_lf_clean)
+    }
+    
+}
+
+```
+
+- Save this large long-form file as a RDS file in case needed in the future
+```{r}
+write_rds(lf_cnty_clean, here("result","long-form-clean-city-county.RDS"))
+```
+
+
+- Generate `Year`,`Month`,`Day` for calendar heatmap
+
+```{r}
+lf_cnty_clean <- lf_cnty_clean %>%
+    mutate(
+    year = lubridate::year(date),
+    month = lubridate::month(date),
+    day =  lubridate::day(date),
+    hour = lubridate::hour(date),
+    minute = 10 * floor(lubridate::minute(date) / 10)
+  ) %>%
+  mutate(ymd = lubridate::ymd(sprintf(
+    "%s-%s-%s",
+    year,
+    month,
+    day
+  )),
+  md = format(as.Date(ymd), "%m-%d")) %>%
+  select(-minute, -hour, -day, -month)
+
+```
+
+- Get a total number of housing units in California
+```{r}
+# ca_tot_hu <- sum(unique(df_cnty$TotalHU))
+ca_tot_hu <- 2688310387
+```
+
+- Aggregate data for calendar heatmap
+
+```{r}
+
+lf_cnty_clean_sum <- lf_cnty_clean %>%
+  group_by(ymd) %>%
+  summarise(CustomersOut = sum(CustomersOut,na.rm = TRUE),
+            year = first(year),
+            md = first(md),
+            ymd = first(ymd)) %>%
+  ungroup() %>%
+    mutate(PctCustomerOut= CustomersOut/ca_tot_hu*100,
+           year = as.numeric(format(ymd, format ="%Y")),
+           md = format(ymd, format ="%m-%d"))
+
+```
+
+- Aggregate data by week for calendar heatmap
+```{r}
+
+lf_cnty_clean_sum_wk <- lf_cnty_clean %>%
+    mutate(month = format(ymd,format = "%b"),
+           week = format(ymd, format = "%W")) %>%
+  group_by(week,year) %>%
+  summarise(CustomersOut = sum(CustomersOut,na.rm = TRUE),
+            month = first(month),
+            ymd = first(ymd)) %>%
+  ungroup() %>%
+    mutate(PctCustomerOut= CustomersOut/ca_tot_hu*100)
+
+```
+- Remove week `00`
+```{r}
+lf_cnty_clean_sum_wk <- lf_cnty_clean_sum_wk %>%
+    filter(!week %in% c('00','53') & ymd >= as.Date("2017-10-01"))
+```
+
+- Set the data of 2017 before the first non-zero value as `NA` as this dataset does not begin until Oct. 2017
+
+```{r}
+idx_nozero <- which(lf_cnty_clean_sum_wk$CustomersOut >0 )
+lf_cnty_clean_sum_wk <- lf_cnty_clean_sum_wk[idx_nozero[1]:idx_nozero[length(idx_nozero)],]
+```
+
+## Create calendar heatmap plot
+
+- Prepare a function to create beautiful breaks
+```{r}
+  caculate_class <- function(var,nclass){
+    # library(plyr)
+    class_brks <- classIntervals(var, n = nclass,intervalClosure = "left",
+                                 style = "pretty")
+    # class <- round_any(class_brks$brks,5)
+    class <- class_brks$brks
+    
+    return(class)
+  }
+```
+
+### Create calendar heatmap for weekly aggregation
+
+- Prepare a vector for X-axis label
+```{r}
+df_mo_wk <- lf_cnty_clean_sum_wk %>%
+    group_by(week) %>%
+    summarise(month = first(month))
+
+week_breaks <- df_mo_wk$week
+
+week_labels <- rep("",nrow(df_mo_wk))
+week_labels[seq(1:(nrow(df_mo_wk)/4))*4-2] = 
+    df_mo_wk$month[seq(1:(nrow(df_mo_wk)/4))*4-2]
+```
+
+- Plot heatmap
+```{r}
+lf_cnty_clean_sum_wk %>%
+  ggplot(aes(x=week, y=year, fill= PctCustomerOut)) + 
+  geom_tile(color = "white",size = 0.1)+
+  scale_fill_distiller(palette = "YlGnBu",trans = "reverse",name="% Customers\nlost power",
+                       breaks = caculate_class(lf_cnty_clean_sum$PctCustomerOut,4),
+                       labels = caculate_class(lf_cnty_clean_sum$PctCustomerOut,4)) +
+  scale_x_discrete(breaks = week_breaks,
+                   labels = week_labels) +
+
+  scale_y_reverse()+
+  theme_ipsum()+
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
+  ggtitle("% Customers experiencing city-level power outages in California each week") -> ca_heatmap
+
+ca_heatmap
+```
+
+- Save results
+```{r}
+ggsave(
+  here("plot","02_ca_power_outage_city_level_calendar_heatmap.png"),
+  ca_heatmap,
+  # device = cairo_pdf,
+  width = 9,
+  height = 6,
+  scale = 1
+)
+```

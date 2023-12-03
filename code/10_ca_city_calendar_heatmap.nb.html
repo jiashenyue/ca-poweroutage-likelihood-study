@@ -9,10 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Shenyue Jia" />
 
 
-<title>Identify county-level wildfire-induced events</title>
+<title>Generate a calendar heatmap for all city-level power outages in California</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1747,30 +1746,18 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Identify county-level wildfire-induced
-events</h1>
-<h4 class="author">Shenyue Jia</h4>
+<h1 class="title toc-ignore">Generate a calendar heatmap for all
+city-level power outages in California</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<ul>
-<li>This notebook produce a dataset with a new flag field to identify if
-a power outage event at the CDP levelis wildfire-induced.</li>
-<li>Wildfire-induced power outages
-<ul>
-<li>Directly caused by wildfire progression</li>
-<li>Caused by Public Safety Power Shutoffs (PSPS)</li>
-<li>Power outages caused by PSPS usually have a much larger geographical
-extent and higher number of customers affected</li>
-</ul></li>
-</ul>
+<p>This notebook generates a calendar heat map for all county-level and
+city-level power outage events in California from 2017 to 2020</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBsb2FkaW5nIGxpYnJhcmllc1xubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHpvbylcbmxpYnJhcnkoZm9yZWlnbilcbmxpYnJhcnkoaGVyZSlcbmxpYnJhcnkocHVycnIpXG5saWJyYXJ5KGx1YnJpZGF0ZSlcbmxpYnJhcnkoc3RyaW5ncilcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBsb2FkaW5nIGxpYnJhcmllc1xubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHpvbylcbmxpYnJhcnkoZm9yZWlnbilcbmxpYnJhcnkoaGVyZSlcbmxpYnJhcnkocHVycnIpXG5saWJyYXJ5KGx1YnJpZGF0ZSlcbmxpYnJhcnkoZ2d0aGVtZXMpXG5saWJyYXJ5KGhyYnJ0aGVtZXMpXG5gYGAifQ== -->
 <pre class="r"><code># loading libraries
 library(tidyverse)
 library(zoo)
@@ -1778,6 +1765,16 @@ library(foreign)
 library(here)
 library(purrr)
 library(lubridate)
+library(ggthemes)
+library(hrbrthemes)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTk9URTogRWl0aGVyIEFyaWFsIE5hcnJvdyBvciBSb2JvdG8gQ29uZGVuc2VkIGZvbnRzIGFyZSByZXF1aXJlZCB0byB1c2UgdGhlc2UgdGhlbWVzLlxuICAgICAgUGxlYXNlIHVzZSBocmJydGhlbWVzOjppbXBvcnRfcm9ib3RvX2NvbmRlbnNlZCgpIHRvIGluc3RhbGwgUm9ib3RvIENvbmRlbnNlZCBhbmRcbiAgICAgIGlmIEFyaWFsIE5hcnJvdyBpcyBub3Qgb24geW91ciBzeXN0ZW0sIHBsZWFzZSBzZWUgaHR0cHM6Ly9iaXQubHkvYXJpYWxuYXJyb3dcbiJ9 -->
+<pre><code>NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use these themes.
+      Please use hrbrthemes::import_roboto_condensed() to install Roboto Condensed and
+      if Arial Narrow is not on your system, please see https://bit.ly/arialnarrow</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShjbGFzc0ludClcbmxpYnJhcnkoc3RyaW5ncilcbmBgYCJ9 -->
+<pre class="r"><code>library(classInt)
 library(stringr)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
@@ -1792,408 +1789,218 @@ library(stringr)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-</div>
-<div id="obtain-city-level-wildfire-related-events-data" class="section level2">
-<h2>Obtain city-level wildfire-related events data</h2>
-<div id="obtain-wildfire-events-data" class="section level3">
-<h3>Obtain wildfire events data</h3>
+<div id="prepare-data-for-plotting" class="section level2">
+<h2>Prepare data for plotting</h2>
 <ul>
-<li>Obtain cdp-level fire events</li>
+<li>Bind rows of all events at city level</li>
 </ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyZV9jZHAgPC0gcmVhZF9jc3YoaGVyZShcImRhdGFfcHJpdmF0ZVwiLFxuICAgICAgICAgICAgICAgICAgICAgXCJjYS1maXJlLTIwMTctMjAyMi1wbGFjZS1uYW1lLWNvdW50eS1uYW1lLmNzdlwiKSlcbmBgYCJ9 -->
-<pre class="r"><code>fire_cdp &lt;- read_csv(here(&quot;data_private&quot;,
-                     &quot;ca-fire-2017-2022-place-name-county-name.csv&quot;))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUm93czogMTA5OCBDb2x1bW5zOiAxN+KUgOKUgCBDb2x1bW4gc3BlY2lmaWNhdGlvbiDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIBcbkRlbGltaXRlcjogXCIsXCJcbmNociAgICg1KTogRklSRV9OQU1FLCBQTEFDRV9OQU1FLCBQTEFDRV9OQU1FX1RZUEUsIENOVFlfTkFNRSwgQ05UWV9OQU1FX1RZUEVcbmRibCAgKDEwKTogSU5DX05VTSwgQ0FVU0UsIEdJU19BQ1JFUywgU1RBVEVGUCwgUExBQ0VGUCwgUExBQ0VfRklQUywgQ09VTlRZRlAsIENOVFlfRklQUywgU2hhcGVfTGVuZ3RoLCBTaGFwZV9BcmVhXG5kYXRlICAoMik6IEFMQVJNX0RBVEUsIENPTlRfREFURVxu4oS5IFVzZSBgc3BlYygpYCB0byByZXRyaWV2ZSB0aGUgZnVsbCBjb2x1bW4gc3BlY2lmaWNhdGlvbiBmb3IgdGhpcyBkYXRhLlxu4oS5IFNwZWNpZnkgdGhlIGNvbHVtbiB0eXBlcyBvciBzZXQgYHNob3dfY29sX3R5cGVzID0gRkFMU0VgIHRvIHF1aWV0IHRoaXMgbWVzc2FnZS5cbiJ9 -->
-<pre><code>Rows: 1098 Columns: 17── Column specification ──────────────────────────────────────────────────────────────────────────────────────────
-Delimiter: &quot;,&quot;
-chr   (5): FIRE_NAME, PLACE_NAME, PLACE_NAME_TYPE, CNTY_NAME, CNTY_NAME_TYPE
-dbl  (10): INC_NUM, CAUSE, GIS_ACRES, STATEFP, PLACEFP, PLACE_FIPS, COUNTYFP, CNTY_FIPS, Shape_Length, Shape_Area
-date  (2): ALARM_DATE, CONT_DATE
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChmaXJlX2NkcClcbmBgYCJ9 -->
-<pre class="r"><code>head(fire_cdp)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTcsInN1bW1hcnkiOnsiQSB0aWJibGUiOlsiNiDDlyAxNyJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUE0MVZUMmpUVUJoUC82L3R1cTJvNE1GRGxTSHp6eVk0MFlrSDg1YTJVdWlmbUxSekZiRm1iYlRGbUl3MDNlWkIyR0Y2RUJGMjhLVGdRZENEMjJBSURoeTZLUnVpb0REQmcrSmg0bkVpNkhHT3haZm12VFNKbXk0UWZ1Lzd2ZS8zZmUvNytQTENSUHU3QS8wQmdpQmNoTnZsSUZ3ZXVDUTh1V3k4czRjZzNFNW9PQWczNGRkd0JEcHRnNHN3Zk52ZzYwVWJQcERLTURrMmcweHZIMGdtWTNsa3VhUDVHTFBCMmsrRHZsaUVCbWRZUkhpWVJJWUZjTkdpeFNCZkIwZTFrNUR2MTNSOHh4QVdYRXFSZFh5VEkvVEhwZXVXZnV2K0g3d0kzYVFWZzBpdklwMmxSazlSNEtwVlZKL0RPRGFuOEJEWEcwbldVRER2L05hVE9OWE40Nktpa1RkNUVHSEVobnV0YU9pdUMxTVIxK01iNVBEdGNjSTVkcElzNTNaSGdqMjlCbzQrUERTMzV2cEZIaWhPcXkrLzN6ZDBPMUc4TGFLaCt6R3Ixem05ck85L1ZLMkkrWi9TQmJNT3RKODRvaGxnVDVYVVVSMnhJdUxicndsSXAvVUx6NW1ma2FyOFVFVVFlRXowOHB6QVIwQzhGMDlpVEJqaVpZWGIyUHpMdllrdDgzS2x4SW0yUkMxR29raXhvbHhGYk1pUVI2Z29qY2dnU3ZGdmFrTnBNODVlNTNCcjA2TjY2ODdONjBnanRQUElOblF6a3pvLzh3M2hFNFIyZmhMcnpCVjdhWUVyOGpJZXpIeHRBRGN0d0hKRm1idkNpNHIwWDErOFk0MGQwdGtJSmRWRW81bEJUV2Fsd28xTTFvMnRCckQ1NGM2OCt2ejE5T0tpVEQ2ZmVERDd0SDA3T1hQM3k3N0wzVGtEWHp4S3JhNHMrTWs3SGZOVG4rN05HY01hMjcvc1BydHJBaHlMSDAwbW5wMEhIWUhTelZzN1VnYVMxZWF4NC8xdDVFcnIrRnZYd3JUOUpoRmhLZmdtQ2VNSmpDZVlXQ0VOVWpFOG9ZazBWVWpuVXJqWklBbVlWQ0VLc3RqQlQyWFNXVFBob1VDT05YWlBKZGdDb0pnWXZrUjliQmE2eHZHSStlZ2tvQnBtb0c0VzRnbWF0VEttRTdVMm1FSTJUMk82aWNyazB0bThFY3BQUWNzY1NTZE1nVm9Nd2h3SERqMDN5QmVTdkhoSktSc2pWdWVBekhPMkp2cGxhYmdMTnpJRVg2YzI5YXFxcm01eXBRWktuTUoxWGRUR2lLaGZySlp3UG1sUXFVZ2lET2JVL21NZW05Z2gyNGpXbXFnbEwzVVd5elh4Y3VkaExVRjlXMzlDYU8wMXJjTjZTaGMrbUFkL0dyRGdpb2d2TG8vQURmQUNiaFFzc2w1ajE2QmNFUlZjQ1dTclhZcWtjTmd2VUpRRXpPZy9qZlUvRGYvYkdyNEhBQUE9In0= -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["FIRE_NAME"],"name":[1],"type":["chr"],"align":["left"]},{"label":["INC_NUM"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["ALARM_DATE"],"name":[3],"type":["date"],"align":["right"]},{"label":["CONT_DATE"],"name":[4],"type":["date"],"align":["right"]},{"label":["CAUSE"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["GIS_ACRES"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["STATEFP"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["PLACEFP"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["PLACE_FIPS"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["PLACE_NAME"],"name":[10],"type":["chr"],"align":["left"]},{"label":["PLACE_NAME_TYPE"],"name":[11],"type":["chr"],"align":["left"]},{"label":["COUNTYFP"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["CNTY_FIPS"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["CNTY_NAME"],"name":[14],"type":["chr"],"align":["left"]},{"label":["CNTY_NAME_TYPE"],"name":[15],"type":["chr"],"align":["left"]},{"label":["Shape_Length"],"name":[16],"type":["dbl"],"align":["right"]},{"label":["Shape_Area"],"name":[17],"type":["dbl"],"align":["right"]}],"data":[{"1":"AMORUSO","2":"11799","3":"2020-06-01","4":"2020-06-04","5":"2","6":"685.58502","7":"6","8":"62938","9":"662938","10":"Roseville","11":"Roseville city","12":"61","13":"6061","14":"Placer","15":"Placer County","16":"9653.760","17":"2774464.03"},{"1":"VALLEY","2":"15865","3":"2020-07-15","4":"2020-07-16","5":"14","6":"376.91040","7":"6","8":"4576","9":"604576","10":"Beale AFB","11":"Beale AFB CDP","12":"115","13":"6115","14":"Yuba","15":"Yuba County","16":"7596.640","17":"1525302.30"},{"1":"DYER","2":"15012","3":"2020-07-06","4":"2020-07-06","5":"8","6":"194.66029","7":"6","8":"22524","9":"622524","10":"Elverta","11":"Elverta CDP","12":"67","13":"6067","14":"Sacramento","15":"Sacramento County","16":"6043.860","17":"787762.27"},{"1":"DYER","2":"15012","3":"2020-07-06","4":"2020-07-06","5":"8","6":"194.66029","7":"6","8":"22524","9":"622524","10":"Elverta","11":"Elverta CDP","12":"61","13":"6061","14":"Placer","15":"Placer County","16":"6043.860","17":"787762.27"},{"1":"PAVE PAWS","2":"17717","3":"2020-08-02","4":"2020-08-02","5":"11","6":"532.77332","7":"6","8":"4576","9":"604576","10":"Beale AFB","11":"Beale AFB CDP","12":"115","13":"6115","14":"Yuba","15":"Yuba County","16":"7847.305","17":"2156057.03"},{"1":"RIOSA","2":"12970","3":"2020-06-15","4":"2020-06-15","5":"11","6":"13.69472","7":"6","8":"71414","9":"671414","10":"Sheridan","11":"Sheridan CDP","12":"61","13":"6061","14":"Placer","15":"Placer County","16":"1354.188","17":"55420.56"}],"options":{"columns":{"min":{},"max":[10],"total":[17]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyZV9jZHAgPC0gZmlyZV9jZHAgJT4lXG4gICAgc2VsZWN0KENOVFlfTkFNRSxQTEFDRV9GSVBTLCBQTEFDRV9OQU1FLCBQTEFDRV9OQU1FX1RZUEUsXG4gICAgICAgICAgIEFMQVJNX0RBVEUsQ09OVF9EQVRFKSAlPiVcbiAgICByZW5hbWUoXCJzdGFydF9kYXRlXCIgPSBcIkFMQVJNX0RBVEVcIixcbiAgICAgICAgICAgXCJlbmRfZGF0ZVwiID0gXCJDT05UX0RBVEVcIixcbiAgICAgICAgICAgXCJjb3VudHlfbmFtZVwiID0gXCJDTlRZX05BTUVcIixcbiAgICAgICAgICAgXCJwbGFjZV9maXBzXCIgPSBcIlBMQUNFX0ZJUFNcIixcbiAgICAgICAgICAgXCJwbGFjZV9uYW1lXCIgPSBcIlBMQUNFX05BTUVcIixcbiAgICAgICAgICAgXCJwbGFjZV9uYW1lX3R5cGVcIiA9IFwiUExBQ0VfTkFNRV9UWVBFXCIpICU+JVxuICAgIG11dGF0ZShwbGFjZV9maXBzID0gcGFzdGUwKFwiMFwiLHBsYWNlX2ZpcHMpLFxuICAgICAgICAgICB0eXBlID0gXCJXaWxkZmlyZVwiKSAlPiVcbiAgICBhcnJhbmdlKGNvdW50eV9uYW1lLHBsYWNlX25hbWUpXG5cbmhlYWQoZmlyZV9jZHApXG5gYGAifQ== -->
-<pre class="r"><code>fire_cdp &lt;- fire_cdp %&gt;%
-    select(CNTY_NAME,PLACE_FIPS, PLACE_NAME, PLACE_NAME_TYPE,
-           ALARM_DATE,CONT_DATE) %&gt;%
-    rename(&quot;start_date&quot; = &quot;ALARM_DATE&quot;,
-           &quot;end_date&quot; = &quot;CONT_DATE&quot;,
-           &quot;county_name&quot; = &quot;CNTY_NAME&quot;,
-           &quot;place_fips&quot; = &quot;PLACE_FIPS&quot;,
-           &quot;place_name&quot; = &quot;PLACE_NAME&quot;,
-           &quot;place_name_type&quot; = &quot;PLACE_NAME_TYPE&quot;) %&gt;%
-    mutate(place_fips = paste0(&quot;0&quot;,place_fips),
-           type = &quot;Wildfire&quot;) %&gt;%
-    arrange(county_name,place_name)
-
-head(fire_cdp)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6Nywic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDciXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBNjFUelU3ak1CQjJtNlNoZ2JZZ3hMMHYwQ29GU3VtdGFDTzRvbVZYMjF2bEppNVlHRHRLSE8zMnhxUHdGbnZkdzc0QWZSd09kTzNFM2poWnNhZGFzanpmTitQNVp2enpPWmlmZVhNUEFHQUIyMm9BeXhFbWNMNSt1UjVjQW1BM0JXZ0FHN1RsK2tNRUhRdkRGZk5RekpaeXVGY0VQcUVJN2hMV0ZQeUwwWFEwSHBmdzFQZEhsd2E4OEgyL2hPUEpaSHBhd3NuRVAvOEhWaFU2QVlaTHd2bzNDYVFSVW1RcnlKWUVVNzN6T2tGUGpISUZ2VnVDWUFvcFp6ckF1Y3NvSTFWUVZUbXFxUFEvQmJmS3NWOG85VVBNMTRvNlVISW0xeXMxVGJxZGF4bnBEQUpZWFZuQWJOTjlsamM3Mi96K2xhK3ZMN01DLzFTODloZTRkdmRPU0dDYXFtNDBhUWVRSTdHK2x5SW40UDhpMm0rS05MY2Y1NjJjM3Q0M1RLSVZUdERPY2ExWkt0NmdidGJWTnhTeWpQTDFRdnIwQzRnSkRORmloZU8weWhneHZaSlo4SFg4ZDJ2S1ljSVhrV3hVRllOb1pHSTdqNjRXMWs3WTk2RXVyaU5tVXg3amRydDkrK0FrUFpFUURsZUpyQ2MvejBvNmw4VWNNeXFTTmVXM2RtcWJHMG1ONkdWVWlrZUQ4Q0dqajRNektaQzdpOUZSZHN1dzNVTFMwb1U1K21jaGVvK3A3dFVoY0luMHgrbUtKdk1laDNHQ3k5OG0ySFRJR1ljNnpnc1owVXp4VnQ3L0FLMjVVc1hOQkFBQSJ9 -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["county_name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["place_fips"],"name":[2],"type":["chr"],"align":["left"]},{"label":["place_name"],"name":[3],"type":["chr"],"align":["left"]},{"label":["place_name_type"],"name":[4],"type":["chr"],"align":["left"]},{"label":["start_date"],"name":[5],"type":["date"],"align":["right"]},{"label":["end_date"],"name":[6],"type":["date"],"align":["right"]},{"label":["type"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Alameda","2":"0619155","3":"Diablo Grande","4":"Diablo Grande CDP","5":"2020-08-16","6":"2020-09-11","7":"Wildfire"},{"1":"Alameda","2":"0620018","3":"Dublin","4":"Dublin city","5":"2022-08-15","6":"2022-08-15","7":"Wildfire"},{"1":"Alameda","2":"0626000","3":"Fremont","4":"Fremont city","5":"2019-06-02","6":"2019-06-02","7":"Wildfire"},{"1":"Alameda","2":"0657792","3":"Pleasanton","4":"Pleasanton city","5":"2022-06-23","6":"2022-06-23","7":"Wildfire"},{"1":"Alameda","2":"0677042","3":"Sunol","4":"Sunol CDP","5":"2020-08-16","6":"2020-09-11","7":"Wildfire"},{"1":"Alameda","2":"0677042","3":"Sunol","4":"Sunol CDP","5":"2022-06-23","6":"2022-06-23","7":"Wildfire"}],"options":{"columns":{"min":{},"max":[10],"total":[7]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
-<pre class="r"><code>NA</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li>Make sure there is no duplicated fire event in
-<code>fire_cdp</code></li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyZV9jZHAgPC0gZmlyZV9jZHAgJT4lXG4gICAgZGlzdGluY3QoKVxuaGVhZChmaXJlX2NkcClcbmBgYCJ9 -->
-<pre class="r"><code>fire_cdp &lt;- fire_cdp %&gt;%
-    distinct()
-head(fire_cdp)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6Nywic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDciXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBNjFUelU3ak1CQjJtNlNoZ2JZZ3hMMHYwQ29GU3VtdGFDTzRvbVZYMjF2bEppNVlHRHRLSE8zMnhxUHdGbnZkdzc0QWZSd09kTzNFM2poWnNhZGFzanpmTitQNVp2enpPWmlmZVhNUEFHQUIyMm9BeXhFbWNMNSt1UjVjQW1BM0JXZ0FHN1RsK2tNRUhRdkRGZk5RekpaeXVGY0VQcUVJN2hMV0ZQeUwwWFEwSHBmdzFQZEhsd2E4OEgyL2hPUEpaSHBhd3NuRVAvOEhWaFU2QVlaTHd2bzNDYVFSVW1RcnlKWUVVNzN6T2tGUGpISUZ2VnVDWUFvcFp6ckF1Y3NvSTFWUVZUbXFxUFEvQmJmS3NWOG85VVBNMTRvNlVISW0xeXMxVGJxZGF4bnBEQUpZWFZuQWJOTjlsamM3Mi96K2xhK3ZMN01DLzFTODloZTRkdmRPU0dDYXFtNDBhUWVRSTdHK2x5SW40UDhpMm0rS05MY2Y1NjJjM3Q0M1RLSVZUdERPY2ExWkt0NmdidGJWTnhTeWpQTDFRdnIwQzRnSkRORmloZU8weWhneHZaSlo4SFg4ZDJ2S1ljSVhrV3hVRllOb1pHSTdqNjRXMWs3WTk2RXVyaU5tVXg3amRydDkrK0FrUFpFUURsZUpyQ2MvejBvNmw4VWNNeXFTTmVXM2RtcWJHMG1ONkdWVWlrZUQ4Q0dqajROektaQzdpOUZSZHN1dzNVTFMwb1U1K21jaGVvK3A3dFVoY0luMHgrbUtKdk1laDNHQ3k5OG0ySFRJR1ljNnpnc1owVXp4VnQ3L0FBSlJ1VGJOQkFBQSJ9 -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["county_name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["place_fips"],"name":[2],"type":["chr"],"align":["left"]},{"label":["place_name"],"name":[3],"type":["chr"],"align":["left"]},{"label":["place_name_type"],"name":[4],"type":["chr"],"align":["left"]},{"label":["start_date"],"name":[5],"type":["date"],"align":["right"]},{"label":["end_date"],"name":[6],"type":["date"],"align":["right"]},{"label":["type"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Alameda","2":"0619155","3":"Diablo Grande","4":"Diablo Grande CDP","5":"2020-08-16","6":"2020-09-11","7":"Wildfire"},{"1":"Alameda","2":"0620018","3":"Dublin","4":"Dublin city","5":"2022-08-15","6":"2022-08-15","7":"Wildfire"},{"1":"Alameda","2":"0626000","3":"Fremont","4":"Fremont city","5":"2019-06-02","6":"2019-06-02","7":"Wildfire"},{"1":"Alameda","2":"0657792","3":"Pleasanton","4":"Pleasanton city","5":"2022-06-23","6":"2022-06-23","7":"Wildfire"},{"1":"Alameda","2":"0677042","3":"Sunol","4":"Sunol CDP","5":"2020-08-16","6":"2020-09-11","7":"Wildfire"},{"1":"Alameda","2":"0677042","3":"Sunol","4":"Sunol CDP","5":"2022-06-23","6":"2022-06-23","7":"Wildfire"}],"options":{"columns":{"min":{},"max":[10],"total":[7]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="obtain-psps-events-data-at-county-level" class="section level3">
-<h3>Obtain PSPS events data at county level</h3>
-<ul>
-<li>The dataframe structure will be <strong>different</strong> than the
-<code>fire_cdp</code>
-<ul>
-<li>No <code>place_fips</code>, <code>place_name</code>,
-<code>place_name_type</code></li>
-</ul></li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNwc19jbnR5IDwtIHJlYWRfY3N2KGhlcmUoXCJkYXRhX3ByaXZhdGVcIixcInBzcHMtZXZlbnRzLWNvdW50eS0yMDE3LTIwMjAuY3N2XCIpKVxuYGBgIn0= -->
-<pre class="r"><code>psps_cnty &lt;- read_csv(here(&quot;data_private&quot;,&quot;psps-events-county-2017-2020.csv&quot;))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUm93czogMjc4IENvbHVtbnM6IDTilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5EZWxpbWl0ZXI6IFwiLFwiXG5jaHIgKDQpOiBVdGlsaXR5LCBQU1BTIFN0YXJ0IERhdGUsIFBTUFMgRW5kIERhdGUsIENvdW50eVxu4oS5IFVzZSBgc3BlYygpYCB0byByZXRyaWV2ZSB0aGUgZnVsbCBjb2x1bW4gc3BlY2lmaWNhdGlvbiBmb3IgdGhpcyBkYXRhLlxu4oS5IFNwZWNpZnkgdGhlIGNvbHVtbiB0eXBlcyBvciBzZXQgYHNob3dfY29sX3R5cGVzID0gRkFMU0VgIHRvIHF1aWV0IHRoaXMgbWVzc2FnZS5cbiJ9 -->
-<pre><code>Rows: 278 Columns: 4── Column specification ──────────────────────────────────────────────────────────────────────────────────────────
-Delimiter: &quot;,&quot;
-chr (4): Utility, PSPS Start Date, PSPS End Date, County
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChwc3BzX2NudHkpXG5gYGAifQ== -->
-<pre class="r"><code>head(psps_cnty)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBN1ZTd1U2RFFCRGR3dElLQ2RiRUgrQUhnRUpGNjFtcTEwWnMwdXNLV0ltNDI4QVM5ZVozZXlnT2REY0M2c2xJTWpEdnpiNTVNMkZ2dzgzYzJCZ0lJUlZoZFlSVURWS2tyZSt1N1FWQ1dBRXdRaGpwemZjVkRwMUNnaUZPSU1haWdLUHdadm1udk4vdnlKdTUvc3oxTHJwNC9vVW5udThHZlhqZWg1ZGRzZTk2WnczK3djUWJtQVFEbmRkdnUvaTkzT0xndTQwZUVXcUZXYnBsLzBQMGY1Rkd5WE5haWhHd25Iek5zenpqYndKT1Y5RXFzaUpPQ202RmhLZUNObHQ2U1pNdU9iNWlGUVZsMzBVdjJJc2puVXdJNVIxZWRWMS9ETWVKYzFMS2NTUnBKSVFUNTZFQVBhRDlRREpoTzU0eENpS2x1V3JhUUR3cUJzUzBvczBraVIwL1Z2VEpEaHFEdG54NFRKR1BPemsrV0NxMWFLWEpaVk82emFoY1hjdkpmWm9MY0F3YnR3czd1eUtqWEc0Q2JPbHd4b2s4WjhRc2wweTdHOXAvQXFvdGdycGhBd0FBIn0= -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Utility"],"name":[1],"type":["chr"],"align":["left"]},{"label":["PSPS Start Date"],"name":[2],"type":["chr"],"align":["left"]},{"label":["PSPS End Date"],"name":[3],"type":["chr"],"align":["left"]},{"label":["County"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"SDGE","2":"10/20/17","3":"10/21/17","4":"San Diego"},{"1":"SDGE","2":"10/23/17","3":"10/25/17","4":"San Diego"},{"1":"SDGE","2":"12/5/17","3":"12/11/17","4":"San Diego"},{"1":"SDGE","2":"12/6/17","3":"12/8/17","4":"San Diego"},{"1":"SDGE","2":"12/9/17","3":"12/11/17","4":"San Diego"},{"1":"SDGE","2":"12/14/17","3":"12/15/17","4":"San Diego"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li>Format <code>psps_cnty</code> start/end date</li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNwc19jbnR5IDwtIHBzcHNfY250eSAlPiVcbiAgICBtdXRhdGUoYFBTUFMgU3RhcnQgRGF0ZWAgPSBhcy5EYXRlKGBQU1BTIFN0YXJ0IERhdGVgLCBmb3JtYXQgPSBcIiVtLyVkLyV5XCIpLFxuICAgICAgICAgICBgUFNQUyBFbmQgRGF0ZWAgPSBhcy5EYXRlKGBQU1BTIEVuZCBEYXRlYCwgZm9ybWF0ID0gXCIlbS8lZC8leVwiKSlcbmhlYWQocHNwc19jbnR5KVxuYGBgIn0= -->
-<pre class="r"><code>psps_cnty &lt;- psps_cnty %&gt;%
-    mutate(`PSPS Start Date` = as.Date(`PSPS Start Date`, format = &quot;%m/%d/%y&quot;),
-           `PSPS End Date` = as.Date(`PSPS End Date`, format = &quot;%m/%d/%y&quot;))
-head(psps_cnty)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBN1ZTUVUrRE1CUXVVRmdnd2t5OHlFNzhBYmlZR0k4a01yMHU0cEpkSytBa1lydEFpWHJ6cCswdjdPOTRHR3RwbXcyU25Zd2t6WHZmMS9aOTczdjBLVm5kT0NzSEFHQUFhR2pBTUZrS3pPWHpRM2dIQU5RWjBBQUVObzlmN05BVlN5QmJsMnhaY2dPbXllUDhUemt3UEY0djNsMXN1WHk4YzM5RXZJNWxsTmlYZU5ialVZTm1WcUdta2MwcEVpYUlGaXp1anlJdUVFVThHWDBwNm8vd2JIc1UwYnZ6ZFFmRHNGT0VnNlFzMXVSL2lKRmxqRDRLWlJsS2NyS2taVlhTYndtbmkzU1JCaWxGTlEzNnBnWHQ5dlFjNTZla2RVOWF6RzRPVmV5YWZFWktpVTlQNStQdnV1NzN6SENjSEZFVXZkYnNpaGpSb055RWJHaEpNQ3VtOCtka2ppNXI5WWlZdHBpTDUySDIxdUwzOEpZTDlOdmljMlZ1bmVSUVNCcXFNVlA1Sy9DNnhNcXRXYUdYb3BMQVl5WjdqOUdtTGpGVlRoamJSSlJRcE00NUdha1VJMzcvL2dBd1g3MkJSUU1BQUE9PSJ9 -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Utility"],"name":[1],"type":["chr"],"align":["left"]},{"label":["PSPS Start Date"],"name":[2],"type":["date"],"align":["right"]},{"label":["PSPS End Date"],"name":[3],"type":["date"],"align":["right"]},{"label":["County"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"SDGE","2":"2017-10-20","3":"2017-10-21","4":"San Diego"},{"1":"SDGE","2":"2017-10-23","3":"2017-10-25","4":"San Diego"},{"1":"SDGE","2":"2017-12-05","3":"2017-12-11","4":"San Diego"},{"1":"SDGE","2":"2017-12-06","3":"2017-12-08","4":"San Diego"},{"1":"SDGE","2":"2017-12-09","3":"2017-12-11","4":"San Diego"},{"1":"SDGE","2":"2017-12-14","3":"2017-12-15","4":"San Diego"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li>Rename fields and re-organized fields in <code>psps_cnty</code></li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNwc19jbnR5IDwtIHBzcHNfY250eSAlPiVcbiAgICByZW5hbWUoXCJzdGFydF9kYXRlXCIgPSBcIlBTUFMgU3RhcnQgRGF0ZVwiLFxuICAgICAgICAgICBcImVuZF9kYXRlXCIgPSBcIlBTUFMgRW5kIERhdGVcIixcbiAgICAgICAgICAgXCJjb3VudHlfbmFtZVwiID0gXCJDb3VudHlcIikgJT4lXG4gICAgbXV0YXRlKHR5cGUgPSBcIlBTUFNcIikgJT4lXG4gICAgc2VsZWN0KGNvdW50eV9uYW1lLHN0YXJ0X2RhdGUsZW5kX2RhdGUsdHlwZSkgJT4lXG4gICAgYXJyYW5nZShjb3VudHlfbmFtZSlcbm5hbWVzKHBzcHNfY250eSlcbmBgYCJ9 -->
-<pre class="r"><code>psps_cnty &lt;- psps_cnty %&gt;%
-    rename(&quot;start_date&quot; = &quot;PSPS Start Date&quot;,
-           &quot;end_date&quot; = &quot;PSPS End Date&quot;,
-           &quot;county_name&quot; = &quot;County&quot;) %&gt;%
-    mutate(type = &quot;PSPS&quot;) %&gt;%
-    select(county_name,start_date,end_date,type) %&gt;%
-    arrange(county_name)
-names(psps_cnty)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiY291bnR5X25hbWVcIiBcInN0YXJ0X2RhdGVcIiAgXCJlbmRfZGF0ZVwiICAgIFwidHlwZVwiICAgICAgIFxuIn0= -->
-<pre><code>[1] &quot;county_name&quot; &quot;start_date&quot;  &quot;end_date&quot;    &quot;type&quot;       </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChwc3BzX2NudHkpXG5gYGAifQ== -->
-<pre class="r"><code>head(psps_cnty)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBNlZTd1U2RFFCQWRZS0VXMDJyaTJhUS9BQmNQZXFSSjQ3bXhtdlRXcklCS3hJWEFFdTJ0bjFZVC9ZRDJjendVWjluZHRKRDBvaVNUblhteis5NjhaZThtOHl0MzdnS0FCY1F5d0xJeEJmdmgvdGE3QVNBbUZnWVE2SXYxQXpkZFlFSXd6akVjMWVpTlUvb1dSL1F2cFROTzg0VEZuUXFzb2FpQ3pYb2x4Z2syWCt0bTNWNEdjaDJCeE52OXpzQjJtTkt5Vk1OcWtFd29Sd0hZN1VVK0ZkbjNTb2tvc1pFaWIvZWxpRmtmNTIxZERwbk9wck4vNVIxVERLOVBteUlLUEEyeml2SGxRdlFVNUphY0Zud1JpYWtrY2hLejZMQW1mSm5ISGZaK2tiMzdXbUdBWVFyUGRWMy9ITEh0SWlIMW53b2gzSmh2MGZXeW5DY1pRekpUUEJ5N2M5Z29Pc0JaeFlSNDVJVXZGWHYxcm9WQTA1YmZRT1hPUVU2a3BLVUhzL1ZUaXRuei9tSFpLWDJNVTFVTTBXVGowYytMaEhIdEJOSFM1eG1uZXA4YlpxbEc1SS9kL1FLWUw4L1dMd01BQUE9PSJ9 -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["county_name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["start_date"],"name":[2],"type":["date"],"align":["right"]},{"label":["end_date"],"name":[3],"type":["date"],"align":["right"]},{"label":["type"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"Alameda","2":"2019-10-09","3":"2019-10-11","4":"PSPS"},{"1":"Alameda","2":"2019-10-26","3":"2019-10-29","4":"PSPS"},{"1":"Alameda","2":"2020-10-14","3":"2020-10-16","4":"PSPS"},{"1":"Alameda","2":"2020-10-25","3":"2020-10-27","4":"PSPS"},{"1":"Alpine","2":"2019-10-09","3":"2019-10-11","4":"PSPS"},{"1":"Alpine","2":"2019-10-26","3":"2019-10-29","4":"PSPS"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li>Make sure there is no duplicated fire event in
-<code>psps_cnty</code></li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHNwc19jbnR5IDwtIHBzcHNfY250eSAlPiVcbiAgICBkaXN0aW5jdCgpXG5oZWFkKHBzcHNfY250eSlcbmBgYCJ9 -->
-<pre class="r"><code>psps_cnty &lt;- psps_cnty %&gt;%
-    distinct()
-head(psps_cnty)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6NCwic3VtbWFyeSI6eyJBIHRpYmJsZSI6WyI2IMOXIDQiXX19LCJyZGYiOiJINHNJQUFBQUFBQUFBNlZTc1U3RE1CQzlKRTVLZzFxUW1KSDZBODNDd3BoS0ZYTkZRZXBXbVNSQVJMQ2p4QkYwNjZjVkNUNmdmQTVEd3ptMjFTWlNGNGhrK2U2ZC9kNDk1MjZuaXl0LzRRT0FBOFN4d0hFeEJQZis3bVo4RFVCc1RDd2cwSmY3T3g2NndJRGdPc2ZsNlVKdmt0SFhKS1ovU2IxSmxxY3M2V1RnREdVV2JqZHIyVTY0L2R3MCsvZGxxUFlSS0x4ZDd6VHNSaGt0Uzkyc0FjbVVDaFNBM1Y3a1E1TjlyYldJRmh0cDhuWmRpZGoxY2Q3VzQ1RFpmRGIvVjl3eHhmRDVqQ21pd2RPSVYweXNsckttSWI4VXRCRExXSGFsa0pPRXhZYzVFYXM4NmJEM0MvNFdHSVVCTGx0NnJ1djY1NGh0SHdscDhGaEk0Y1o4aTY3SGM1RnlobVMySEJ5M2M5a3FPc0JaeGFSNFBJNmVLL1lpSnhEOHBxeStnWTY5ZzVnb1NjYzA1cHBSU3RqVGZyRGNqRDRrbVU2R2FMTHhHT1JGeW9SeGdtZ1pDQzZvT2VkSFBET0krckc3WDZYYU40a3ZBd0FBIn0= -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["county_name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["start_date"],"name":[2],"type":["date"],"align":["right"]},{"label":["end_date"],"name":[3],"type":["date"],"align":["right"]},{"label":["type"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"Alameda","2":"2019-10-09","3":"2019-10-11","4":"PSPS"},{"1":"Alameda","2":"2019-10-26","3":"2019-10-29","4":"PSPS"},{"1":"Alameda","2":"2020-10-14","3":"2020-10-16","4":"PSPS"},{"1":"Alameda","2":"2020-10-25","3":"2020-10-27","4":"PSPS"},{"1":"Alpine","2":"2019-10-09","3":"2019-10-11","4":"PSPS"},{"1":"Alpine","2":"2019-10-26","3":"2019-10-29","4":"PSPS"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-</div>
-<div id="identify-city-level-events-using-city-and-county-level-wildfire-related-events" class="section level2">
-<h2>Identify city-level events using city and county-level
-wildfire-related events</h2>
-<ul>
-<li>A function to judge of one power outage event is wildfire-induced or
-not</li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBGdW5jdGlvbiB0byBjaGVjayBpZiBhIGRhdGUgaXMgd2l0aGluIGEgZ2l2ZW4gcGVyaW9kXG5pc19kYXRlX3dpdGhpbl9wZXJpb2QgPC0gZnVuY3Rpb24oY2hlY2tfZGF0ZSwgc3RhcnRfZGF0ZSwgZW5kX2RhdGUpIHtcbiAgY2hlY2tfZGF0ZSA+PSBzdGFydF9kYXRlICYgY2hlY2tfZGF0ZSA8PSBlbmRfZGF0ZVxufVxuYGBgIn0= -->
-<pre class="r"><code># Function to check if a date is within a given period
-is_date_within_period &lt;- function(check_date, start_date, end_date) {
-  check_date &gt;= start_date &amp; check_date &lt;= end_date
-}</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li><p>Loop to apply the function and flag if an event is
-wildfire-induced or not</p></li>
-<li><p>This time, we need to apply different treatment for PSPS and
-wildfire events as PSPS data is only available at
-<strong>county</strong> level</p></li>
-<li><p>A function to judge if an event is wildfire-induced</p></li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxud2lsZGZpcmVfaW5kdWNlZF9ldmVudHMgPC0gZnVuY3Rpb24oY3Vycl9jb3VudHksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjdXJyX2RmX291dGFnZSwgY3Vycl9kZl9maXJlKXtcbiAgICBmb3IgKGogaW4gMTpucm93KGN1cnJfZGZfZmlyZSkpe1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGNoZWNrX2RhdGUgPC0gY3Vycl9kZl9maXJlJHN0YXJ0X2RhdGVbal1cbiAgICAgICAgICAgICAgICB0eXBlIDwtIGN1cnJfZGZfZmlyZSR0eXBlW2pdXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgIyBDaGVjayBpZiB0aGUgc3BlY2lmaWMgZGF0ZSBpcyB3aXRoaW4gYW55IG9mIHRoZSBwZXJpb2RzXG4gICAgICAgICAgICAgICAgcmVzdWx0IDwtIGN1cnJfZGZfb3V0YWdlICU+JVxuICAgICAgICAgICAgICAgICAgbXV0YXRlKFxuICAgICAgICAgICAgICAgICAgICBkYXRlX3dpdGhpbl9wZXJpb2QgPSBpc19kYXRlX3dpdGhpbl9wZXJpb2QoY2hlY2tfZGF0ZSwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTdGFydCwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBFbmQpLFxuICAgICAgICAgICAgICAgICAgKSAlPiVcbiAgICAgICAgICAgICAgICBmaWx0ZXIoZGF0ZV93aXRoaW5fcGVyaW9kID09IFRSVUUpICU+JVxuICAgICAgICAgICAgICAgICAgICBtdXRhdGUodHlwZSA9IHR5cGUpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgIyBiaW5kIHJvd3MgZm9yIGZpbmFsIHJlc3VsdHNcbiAgICAgICAgICAgICAgICBpZiAoaiA9PSAxKXtcbiAgICAgICAgICAgICAgICAgICAgcmVzdWx0X2JpbmQgPC0gcmVzdWx0XG4gICAgICAgICAgICAgICAgfWVsc2V7XG4gICAgICAgICAgICAgICAgICAgIHJlc3VsdF9iaW5kIDwtIGJpbmRfcm93cyhcbiAgICAgICAgICAgICAgICAgICAgICAgIHJlc3VsdF9iaW5kLFxuICAgICAgICAgICAgICAgICAgICAgICAgcmVzdWx0XG4gICAgICAgICAgICAgICAgICAgIClcbiAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHJldHVybihyZXN1bHRfYmluZClcbiAgICBcbn1cbmBgYCJ9 -->
-<pre class="r"><code>wildfire_induced_events &lt;- function(curr_county,
-                                    curr_df_outage, curr_df_fire){
-    for (j in 1:nrow(curr_df_fire)){
-                
-                check_date &lt;- curr_df_fire$start_date[j]
-                type &lt;- curr_df_fire$type[j]
-                
-                # Check if the specific date is within any of the periods
-                result &lt;- curr_df_outage %&gt;%
-                  mutate(
-                    date_within_period = is_date_within_period(check_date, 
-                                                               Start, 
-                                                               End),
-                  ) %&gt;%
-                filter(date_within_period == TRUE) %&gt;%
-                    mutate(type = type)
-                
-                # bind rows for final results
-                if (j == 1){
-                    result_bind &lt;- result
-                }else{
-                    result_bind &lt;- bind_rows(
-                        result_bind,
-                        result
-                    )
-                }
-                
-    }
-    
-    return(result_bind)
-    
-}</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<ul>
-<li>Obtain cdp-level data for each county</li>
-</ul>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2RwX2ZpbGVfbmFtZXMgPC0gbGlzdC5maWxlcyhoZXJlKFwicmVzdWx0XCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJwb3dlci1vdXRhZ2UtZXZlbnRzLWNpdHktYXQtbGVhc3QtNjBtaW5cIiksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhdHRlcm4gPSBcIlxcXFwuY3N2JFwiLCBpZ25vcmUuY2FzZSA9IFRSVUUpXG5jb3VudHlfbmFtZXMgPC0gc3Vic3RyKGNkcF9maWxlX25hbWVzLDEsIFxuICAgICAgICAgICAgICAgICAgICAgICAobmNoYXIoY2RwX2ZpbGVfbmFtZXMpLW5jaGFyKFwiX2NkcF9wY3RfaG91c2luZ191bml0XzIwMTdfMjAyMC5jc3ZcIikpKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2RwX2ZpbGVfbmFtZXMgPC0gbGlzdC5maWxlcyhoZXJlKFwicmVzdWx0XCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXCJwb3dlci1vdXRhZ2UtZXZlbnRzLWNpdHktYXQtbGVhc3QtNjBtaW5cIiksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhdHRlcm4gPSBcIlxcXFwuY3N2JFwiLCBpZ25vcmUuY2FzZSA9IFRSVUUpXG5jb3VudHlfbmFtZXMgPC0gc3Vic3RyKGNkcF9maWxlX25hbWVzLDEsIFxuICAgICAgICAgICAgICAgICAgICAgICAobmNoYXIoY2RwX2ZpbGVfbmFtZXMpLW5jaGFyKFwiX2NkcF9wY3RfaG91c2luZ191bml0XzIwMTdfMjAyMC5jc3ZcIikpKVxuXG5oZXJlKFwicmVzdWx0XCIsXCJwb3dlci1vdXRhZ2UtZXZlbnRzLWNpdHktYXQtbGVhc3QtNjBtaW5cIixcbiAgICAgICAgICAgICAgICBjZHBfZmlsZV9uYW1lcykgJT4lXG4gICAgbWFwX2RmcihyZWFkX2NzdikgLT4gZGZfY2RwXG4gICAgXG5gYGAifQ== -->
 <pre class="r"><code>cdp_file_names &lt;- list.files(here(&quot;result&quot;,
                                   &quot;power-outage-events-city-at-least-60min&quot;),
                              pattern = &quot;\\.csv$&quot;, ignore.case = TRUE)
 county_names &lt;- substr(cdp_file_names,1, 
-                       (nchar(cdp_file_names)-nchar(&quot;_cdp_pct_housing_unit_2017_2020.csv&quot;)))</code></pre>
+                       (nchar(cdp_file_names)-nchar(&quot;_cdp_pct_housing_unit_2017_2020.csv&quot;)))
+
+here(&quot;result&quot;,&quot;power-outage-events-city-at-least-60min&quot;,
+                cdp_file_names) %&gt;%
+    map_dfr(read_csv) -&gt; df_cdp
+    </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<div id="check-if-any-of-the-cdp-level-event-is-wildfire-induced" class="section level3">
-<h3>Check if any of the cdp-level event is wildfire-induced</h3>
 <ul>
-<li>Apply judge function for wildfire events</li>
+<li>Use the selected power outage info above and the long-form data to
+generate a new version of long-form data with customers out of
+power</li>
 </ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm9yIChpIGluIDE6bGVuZ3RoKGNvdW50eV9uYW1lcykpe1xuICAgIFxuICAgIHByaW50KHBhc3RlKFwiUHJvY2Vzc2luZ1wiLGNvdW50eV9uYW1lc1tpXSkpXG4gICAgXG4gICAgIyBPYnRhaW4gZGF0YSBmb3IgY2l0eS1sZXZlbCBwb3dlciBvdXRhZ2VcbiAgICAjIENpdHktbGV2ZWwgcG93ZXIgb3V0YWdlIGRhdGEgYXJlIG9yZ2FuaXplZCBieSBjb3VudGllc1xuXG4gICAgZGZfb3V0YWdlIDwtIHJlYWRfY3N2KGhlcmUoXCJyZXN1bHRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcInBvd2VyLW91dGFnZS1ldmVudHMtY2l0eS1hdC1sZWFzdC02MG1pblwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhc3RlKGNvdW50eV9uYW1lc1tpXSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcImNkcF9wY3RfaG91c2luZ191bml0XzIwMTdfMjAyMC5jc3ZcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzZXAgPSBcIl9cIikpKVxuICAgIFxuICAgIGlmKG5yb3coZGZfb3V0YWdlKT4wKXtcbiAgICAgICAgXG4gICAgICAgIGRmX291dGFnZSA8LSBkZl9vdXRhZ2UgJT4lXG4gICAgICAgICAgICBhcnJhbmdlKFN0YXJ0KVxuICAgICAgICBcbiAgICAgICAgZGZfZmlyZSA8LSBmaXJlX2NkcCAlPiVcbiAgICAgICAgICAgIGZpbHRlcihjb3VudHlfbmFtZSA9PSBjb3VudHlfbmFtZXNbaV0pICU+JVxuICAgICAgICAgICAgYXJyYW5nZShzdGFydF9kYXRlLCBjb3VudHlfbmFtZSlcbiAgICAgICAgXG4gICAgICAgIGlmKG5yb3coZGZfZmlyZSk+MCl7XG4gICAgICAgICAgICBjdXJyX3Jlc3VsdCA8LSB3aWxkZmlyZV9pbmR1Y2VkX2V2ZW50cyhjb3VudHlfbmFtZVtpXSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZGZfb3V0YWdlLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkZl9maXJlKSAgICAgICAgICAgIFxuICAgICAgICB9XG4gICAgICAgIFxuICAgICMgYmluZCByZXN1bHRzIGZvciBjb3VudGllcyB0b2dldGhlclxuICAgIGlmKGk9PTEpe1xuICAgICAgICBvdXRfZGZfd2lsZGZpcmUgPC0gY3Vycl9yZXN1bHRcbiAgICB9ZWxzZXtcbiAgICAgICAgb3V0X2RmX3dpbGRmaXJlIDwtIGJpbmRfcm93cyhvdXRfZGZfd2lsZGZpcmUsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgY3Vycl9yZXN1bHQpXG4gICAgfSAgICBcbiAgICAgICAgXG5cbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG59XG5cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBHZXQgY2RwIGFuZCBjb3VudHkgbmFtZXNcbmNvdW50eV9jZHBfbmFtZXMgPC0gZGZfY2RwICU+JVxuICAgIGRpc3RpbmN0KENEUCwgQ291bnR5KVxuY291bnR5X25hbWVzIDwtIHVuaXF1ZShjb3VudHlfY2RwX25hbWVzJENvdW50eSlcbmBgYCJ9 -->
+<pre class="r"><code># Get cdp and county names
+county_cdp_names &lt;- df_cdp %&gt;%
+    distinct(CDP, County)
+county_names &lt;- unique(county_cdp_names$County)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm9yIChpIGluIDE6bGVuZ3RoKGNvdW50eV9uYW1lcykpe1xuICAgIFxuICAgIHByaW50KHBhc3RlKFwiUHJvY2Vzc2luZ1wiLGNvdW50eV9uYW1lc1tpXSkpXG4gICAgY3Vycl9sZiA8LSByZWFkUkRTKGhlcmUoXCJyZXN1bHRcIixcImxvbmdfZm9ybV9taXNzaW5nX2ZsZ19maXhlZF9jaXR5XCIsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhc3RlMChjb3VudHlfbmFtZXNbaV0sXCJfbG9uZ19mb3JtLlJEU1wiKSkpXG4gICAgXG4gICAgY2RwX25hbWVzIDwtIGNvdW50eV9jZHBfbmFtZXMgJT4lXG4gICAgICAgIGZpbHRlcihDb3VudHkgPT0gY291bnR5X25hbWVzW2ldKSAlPiVcbiAgICAgICAgc2VsZWN0KENEUClcbiAgICBjZHBfbmFtZXMgPC0gY2RwX25hbWVzJENEUFxuICAgIFxuICAgICMgZ2V0IGEgc3Vic2V0IG9mIHBvd2VyIG91dGFnZSBldmVudHNcbiAgICBjdXJyX29vcCA8LSBkZl9jZHAgJT4lXG4gICAgICAgIGZpbHRlcihDb3VudHkgPT0gY291bnR5X25hbWVzW2ldICYgQ0RQICVpbiUgY2RwX25hbWVzKVxuICAgIFxuICAgICMgc3Vic2V0IGxvbmcgZm9ybSB0byBrZWVwIHRoZSBzZWxlY3RlZCBwb3dlciBvdXRhZ2UgZXZlbnRzXG4gICAgY3Vycl9sZl9jbGVhbiA8LSBjdXJyX2xmICU+JVxuICAgICAgICBtdXRhdGUoQ3VzdG9tZXJzT3V0ID0gaWZlbHNlKGRhdGUgPj0gY3Vycl9vb3AkU3RhcnQgJiBkYXRlIDw9IGN1cnJfb29wJEVuZCxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDdXN0b21lcnNPdXQsIDApLFxuICAgICAgICAgICAgICAgVG90YWxIVSA9IGZpcnN0KGN1cnJfb29wJFRvdGFsSFUpKVxuICAgIFxuICAgIHJtKGN1cnJfbGYpXG4gICAgXG4gICAgaWYoaSA9PSAxKXtcbiAgICAgICAgbGZfY250eV9jbGVhbiA8LSBjdXJyX2xmX2NsZWFuXG4gICAgfWVsc2V7XG4gICAgICAgIGxmX2NudHlfY2xlYW4gPC0gYmluZF9yb3dzKGxmX2NudHlfY2xlYW4sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGN1cnJfbGZfY2xlYW4pXG4gICAgfVxuICAgIFxufVxuXG5gYGAifQ== -->
 <pre class="r"><code>for (i in 1:length(county_names)){
     
     print(paste(&quot;Processing&quot;,county_names[i]))
+    curr_lf &lt;- readRDS(here(&quot;result&quot;,&quot;long_form_missing_flg_fixed_city&quot;,
+                             paste0(county_names[i],&quot;_long_form.RDS&quot;)))
     
-    # Obtain data for city-level power outage
-    # City-level power outage data are organized by counties
-
-    df_outage &lt;- read_csv(here(&quot;result&quot;,
-                               &quot;power-outage-events-city-at-least-60min&quot;,
-                               paste(county_names[i],
-                                     &quot;cdp_pct_housing_unit_2017_2020.csv&quot;,
-                                     sep = &quot;_&quot;)))
+    cdp_names &lt;- county_cdp_names %&gt;%
+        filter(County == county_names[i]) %&gt;%
+        select(CDP)
+    cdp_names &lt;- cdp_names$CDP
     
-    if(nrow(df_outage)&gt;0){
-        
-        df_outage &lt;- df_outage %&gt;%
-            arrange(Start)
-        
-        df_fire &lt;- fire_cdp %&gt;%
-            filter(county_name == county_names[i]) %&gt;%
-            arrange(start_date, county_name)
-        
-        if(nrow(df_fire)&gt;0){
-            curr_result &lt;- wildfire_induced_events(county_name[i],
-                                               df_outage,
-                                               df_fire)            
-        }
-        
-    # bind results for counties together
-    if(i==1){
-        out_df_wildfire &lt;- curr_result
+    # get a subset of power outage events
+    curr_oop &lt;- df_cdp %&gt;%
+        filter(County == county_names[i] &amp; CDP %in% cdp_names)
+    
+    # subset long form to keep the selected power outage events
+    curr_lf_clean &lt;- curr_lf %&gt;%
+        mutate(CustomersOut = ifelse(date &gt;= curr_oop$Start &amp; date &lt;= curr_oop$End,
+                                     CustomersOut, 0),
+               TotalHU = first(curr_oop$TotalHU))
+    
+    rm(curr_lf)
+    
+    if(i == 1){
+        lf_cnty_clean &lt;- curr_lf_clean
     }else{
-        out_df_wildfire &lt;- bind_rows(out_df_wildfire,
-                            curr_result)
-    }    
-        
-
-        
-        
-        
+        lf_cnty_clean &lt;- bind_rows(lf_cnty_clean,
+                                   curr_lf_clean)
     }
-    
     
 }
 </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-</div>
-<div id="check-if-any-of-the-cdp-level-event-is-psps-induced" class="section level3">
-<h3>Check if any of the cdp-level event is PSPS-induced</h3>
 <ul>
-<li>Apply the function to determine if a power outage event is a
-wildfire-induced one</li>
+<li>Save this large long-form file as a RDS file in case needed in the
+future</li>
 </ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm9yIChpIGluIDE6bGVuZ3RoKGNvdW50eV9uYW1lcykpe1xuICAgIFxuICAgIHByaW50KHBhc3RlKFwiUHJvY2Vzc2luZ1wiLGNvdW50eV9uYW1lc1tpXSkpXG4gICAgXG4gICAgIyBPYnRhaW4gZGF0YSBmb3IgY2l0eS1sZXZlbCBwb3dlciBvdXRhZ2VcbiAgICAjIENpdHktbGV2ZWwgcG93ZXIgb3V0YWdlIGRhdGEgYXJlIG9yZ2FuaXplZCBieSBjb3VudGllc1xuXG4gICAgZGZfb3V0YWdlIDwtIHJlYWRfY3N2KGhlcmUoXCJyZXN1bHRcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcInBvd2VyLW91dGFnZS1ldmVudHMtY2l0eS1hdC1sZWFzdC02MG1pblwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhc3RlKGNvdW50eV9uYW1lc1tpXSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcImNkcF9wY3RfaG91c2luZ191bml0XzIwMTdfMjAyMC5jc3ZcIixcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzZXAgPSBcIl9cIikpKVxuICAgIFxuICAgIGlmKG5yb3coZGZfb3V0YWdlKT4wKXtcbiAgICAgICAgXG4gICAgICAgIGRmX291dGFnZSA8LSBkZl9vdXRhZ2UgJT4lXG4gICAgICAgICAgICBhcnJhbmdlKFN0YXJ0KVxuICAgICAgICBcbiAgICAgICAgZGZfZmlyZSA8LSBwc3BzX2NudHkgJT4lXG4gICAgICAgICAgICBmaWx0ZXIoY291bnR5X25hbWUgPT0gY291bnR5X25hbWVzW2ldKSAlPiVcbiAgICAgICAgICAgIGFycmFuZ2Uoc3RhcnRfZGF0ZSwgY291bnR5X25hbWUpXG4gICAgICAgIFxuICAgICAgICBpZihucm93KGRmX2ZpcmUpPjApe1xuICAgICAgICAgICAgY3Vycl9yZXN1bHQgPC0gd2lsZGZpcmVfaW5kdWNlZF9ldmVudHMoY291bnR5X25hbWVbaV0sXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRmX291dGFnZSxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZGZfZmlyZSkgICAgICAgICAgICBcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAjIGJpbmQgcmVzdWx0cyBmb3IgY291bnRpZXMgdG9nZXRoZXJcbiAgICBpZihpPT0xKXtcbiAgICAgICAgb3V0X2RmX3BzcHMgPC0gY3Vycl9yZXN1bHRcbiAgICB9ZWxzZXtcbiAgICAgICAgb3V0X2RmX3BzcHMgPC0gYmluZF9yb3dzKG91dF9kZl9wc3BzLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIGN1cnJfcmVzdWx0KVxuICAgIH0gICAgXG4gICAgICAgIFxuXG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIFxufVxuXG5gYGAifQ== -->
-<pre class="r"><code>for (i in 1:length(county_names)){
-    
-    print(paste(&quot;Processing&quot;,county_names[i]))
-    
-    # Obtain data for city-level power outage
-    # City-level power outage data are organized by counties
-
-    df_outage &lt;- read_csv(here(&quot;result&quot;,
-                               &quot;power-outage-events-city-at-least-60min&quot;,
-                               paste(county_names[i],
-                                     &quot;cdp_pct_housing_unit_2017_2020.csv&quot;,
-                                     sep = &quot;_&quot;)))
-    
-    if(nrow(df_outage)&gt;0){
-        
-        df_outage &lt;- df_outage %&gt;%
-            arrange(Start)
-        
-        df_fire &lt;- psps_cnty %&gt;%
-            filter(county_name == county_names[i]) %&gt;%
-            arrange(start_date, county_name)
-        
-        if(nrow(df_fire)&gt;0){
-            curr_result &lt;- wildfire_induced_events(county_name[i],
-                                               df_outage,
-                                               df_fire)            
-        }
-        
-    # bind results for counties together
-    if(i==1){
-        out_df_psps &lt;- curr_result
-    }else{
-        out_df_psps &lt;- bind_rows(out_df_psps,
-                            curr_result)
-    }    
-        
-
-        
-        
-        
-    }
-    
-    
-}
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxud3JpdGVfcmRzKGxmX2NudHlfY2xlYW4sIGhlcmUoXCJyZXN1bHRcIixcImxvbmctZm9ybS1jbGVhbi1jaXR5LWNvdW50eS5SRFNcIikpXG5gYGAifQ== -->
+<pre class="r"><code>write_rds(lf_cnty_clean, here(&quot;result&quot;,&quot;long-form-clean-city-county.RDS&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Generate <code>Year</code>,<code>Month</code>,<code>Day</code> for
+calendar heatmap</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGZfY250eV9jbGVhbiA8LSBsZl9jbnR5X2NsZWFuICU+JVxuICAgIG11dGF0ZShcbiAgICB5ZWFyID0gbHVicmlkYXRlOjp5ZWFyKGRhdGUpLFxuICAgIG1vbnRoID0gbHVicmlkYXRlOjptb250aChkYXRlKSxcbiAgICBkYXkgPSAgbHVicmlkYXRlOjpkYXkoZGF0ZSksXG4gICAgaG91ciA9IGx1YnJpZGF0ZTo6aG91cihkYXRlKSxcbiAgICBtaW51dGUgPSAxMCAqIGZsb29yKGx1YnJpZGF0ZTo6bWludXRlKGRhdGUpIC8gMTApXG4gICkgJT4lXG4gIG11dGF0ZSh5bWQgPSBsdWJyaWRhdGU6OnltZChzcHJpbnRmKFxuICAgIFwiJXMtJXMtJXNcIixcbiAgICB5ZWFyLFxuICAgIG1vbnRoLFxuICAgIGRheVxuICApKSxcbiAgbWQgPSBmb3JtYXQoYXMuRGF0ZSh5bWQpLCBcIiVtLSVkXCIpKSAlPiVcbiAgc2VsZWN0KC1taW51dGUsIC1ob3VyLCAtZGF5LCAtbW9udGgpXG5gYGAifQ== -->
+<pre class="r"><code>lf_cnty_clean &lt;- lf_cnty_clean %&gt;%
+    mutate(
+    year = lubridate::year(date),
+    month = lubridate::month(date),
+    day =  lubridate::day(date),
+    hour = lubridate::hour(date),
+    minute = 10 * floor(lubridate::minute(date) / 10)
+  ) %&gt;%
+  mutate(ymd = lubridate::ymd(sprintf(
+    &quot;%s-%s-%s&quot;,
+    year,
+    month,
+    day
+  )),
+  md = format(as.Date(ymd), &quot;%m-%d&quot;)) %&gt;%
+  select(-minute, -hour, -day, -month)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Get a total number of housing units in California</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Aggregate data for calendar heatmap</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Aggregate data by week for calendar heatmap</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Remove week <code>00</code></li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGZfY250eV9jbGVhbl9zdW1fd2sgPC0gbGZfY250eV9jbGVhbl9zdW1fd2sgJT4lXG4gICAgZmlsdGVyKCF3ZWVrICVpbiUgYygnMDAnLCc1MycpICYgeW1kID49IGFzLkRhdGUoXCIyMDE3LTEwLTAxXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>lf_cnty_clean_sum_wk &lt;- lf_cnty_clean_sum_wk %&gt;%
+    filter(!week %in% c(&#39;00&#39;,&#39;53&#39;) &amp; ymd &gt;= as.Date(&quot;2017-10-01&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Set the data of 2017 before the first non-zero value as
+<code>NA</code> as this dataset does not begin until Oct. 2017</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWR4X25vemVybyA8LSB3aGljaChsZl9jbnR5X2NsZWFuX3N1bV93ayRDdXN0b21lcnNPdXQgPjAgKVxubGZfY250eV9jbGVhbl9zdW1fd2sgPC0gbGZfY250eV9jbGVhbl9zdW1fd2tbaWR4X25vemVyb1sxXTppZHhfbm96ZXJvW2xlbmd0aChpZHhfbm96ZXJvKV0sXVxuYGBgIn0= -->
+<pre class="r"><code>idx_nozero &lt;- which(lf_cnty_clean_sum_wk$CustomersOut &gt;0 )
+lf_cnty_clean_sum_wk &lt;- lf_cnty_clean_sum_wk[idx_nozero[1]:idx_nozero[length(idx_nozero)],]</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-</div>
-<div id="note-on-results" class="section level2">
-<h2>Note on results</h2>
+<div id="create-calendar-heatmap-plot" class="section level2">
+<h2>Create calendar heatmap plot</h2>
 <ul>
-<li>Both <code>out_df_wildfire</code> and <code>out_df_psps</code> are
-empty, indicating no valid results are available and can be marked as
-PSPS or wildfire-induced.</li>
-<li>This needs further investigation, including
-<ul>
-<li>Checking the long form of time series</li>
-<li>Checking the threshold and other parameters applied to identify
-city-level events</li>
-</ul></li>
+<li>Prepare a function to create beautiful breaks</li>
 </ul>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="create-calendar-heatmap-for-weekly-aggregation" class="section level3">
+<h3>Create calendar heatmap for weekly aggregation</h3>
+<ul>
+<li>Prepare a vector for X-axis label</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGZfbW9fd2sgPC0gbGZfY250eV9jbGVhbl9zdW1fd2sgJT4lXG4gICAgZ3JvdXBfYnkod2VlaykgJT4lXG4gICAgc3VtbWFyaXNlKG1vbnRoID0gZmlyc3QobW9udGgpKVxuXG53ZWVrX2JyZWFrcyA8LSBkZl9tb193ayR3ZWVrXG5cbndlZWtfbGFiZWxzIDwtIHJlcChcIlwiLG5yb3coZGZfbW9fd2spKVxud2Vla19sYWJlbHNbc2VxKDE6KG5yb3coZGZfbW9fd2spLzQpKSo0LTJdID0gXG4gICAgZGZfbW9fd2skbW9udGhbc2VxKDE6KG5yb3coZGZfbW9fd2spLzQpKSo0LTJdXG5gYGAifQ== -->
+<pre class="r"><code>df_mo_wk &lt;- lf_cnty_clean_sum_wk %&gt;%
+    group_by(week) %&gt;%
+    summarise(month = first(month))
+
+week_breaks &lt;- df_mo_wk$week
+
+week_labels &lt;- rep(&quot;&quot;,nrow(df_mo_wk))
+week_labels[seq(1:(nrow(df_mo_wk)/4))*4-2] = 
+    df_mo_wk$month[seq(1:(nrow(df_mo_wk)/4))*4-2]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Plot heatmap</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ul>
+<li>Save results</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dzYXZlKFxuICBoZXJlKFwicGxvdFwiLFwiMDJfY2FfcG93ZXJfb3V0YWdlX2NpdHlfbGV2ZWxfY2FsZW5kYXJfaGVhdG1hcC5wbmdcIiksXG4gIGNhX2hlYXRtYXAsXG4gICMgZGV2aWNlID0gY2Fpcm9fcGRmLFxuICB3aWR0aCA9IDksXG4gIGhlaWdodCA9IDYsXG4gIHNjYWxlID0gMVxuKVxuYGBgIn0= -->
+<pre class="r"><code>ggsave(
+  here(&quot;plot&quot;,&quot;02_ca_power_outage_city_level_calendar_heatmap.png&quot;),
+  ca_heatmap,
+  # device = cairo_pdf,
+  width = 9,
+  height = 6,
+  scale = 1
+)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+</div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiSWRlbnRpZnkgY291bnR5LWxldmVsIHdpbGRmaXJlLWluZHVjZWQgZXZlbnRzIgphdXRob3I6IFNoZW55dWUgSmlhCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCiMjIEludHJvZHVjdGlvbgotIFRoaXMgbm90ZWJvb2sgcHJvZHVjZSBhIGRhdGFzZXQgd2l0aCBhIG5ldyBmbGFnIGZpZWxkIHRvIGlkZW50aWZ5IGlmIGEgcG93ZXIgb3V0YWdlIGV2ZW50IGF0IHRoZSBDRFAgbGV2ZWxpcyB3aWxkZmlyZS1pbmR1Y2VkLgotIFdpbGRmaXJlLWluZHVjZWQgcG93ZXIgb3V0YWdlcwogICAgLSBEaXJlY3RseSBjYXVzZWQgYnkgd2lsZGZpcmUgcHJvZ3Jlc3Npb24KICAgIC0gQ2F1c2VkIGJ5IFB1YmxpYyBTYWZldHkgUG93ZXIgU2h1dG9mZnMgKFBTUFMpCiAgICAtIFBvd2VyIG91dGFnZXMgY2F1c2VkIGJ5IFBTUFMgdXN1YWxseSBoYXZlIGEgbXVjaCBsYXJnZXIgZ2VvZ3JhcGhpY2FsIGV4dGVudCBhbmQgaGlnaGVyIG51bWJlciBvZiBjdXN0b21lcnMgYWZmZWN0ZWQKCmBgYHtyIHNldHVwLCB3YXJuaW5nPUZBTFNFfQojIGxvYWRpbmcgbGlicmFyaWVzCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHpvbykKbGlicmFyeShmb3JlaWduKQpsaWJyYXJ5KGhlcmUpCmxpYnJhcnkocHVycnIpCmxpYnJhcnkobHVicmlkYXRlKQpsaWJyYXJ5KHN0cmluZ3IpCmBgYAoKLSBDbGVhbiB3b3Jrc3BhY2UKYGBge3J9CnJtKGxpc3QgPSBscygpKQpgYGAKCiMjIE9idGFpbiBjaXR5LWxldmVsIHdpbGRmaXJlLXJlbGF0ZWQgZXZlbnRzIGRhdGEKCiMjIyBPYnRhaW4gd2lsZGZpcmUgZXZlbnRzIGRhdGEKLSBPYnRhaW4gY2RwLWxldmVsIGZpcmUgZXZlbnRzCmBgYHtyfQpmaXJlX2NkcCA8LSByZWFkX2NzdihoZXJlKCJkYXRhX3ByaXZhdGUiLAogICAgICAgICAgICAgICAgICAgICAiY2EtZmlyZS0yMDE3LTIwMjItcGxhY2UtbmFtZS1jb3VudHktbmFtZS5jc3YiKSkKaGVhZChmaXJlX2NkcCkKYGBgCgpgYGB7cn0KZmlyZV9jZHAgPC0gZmlyZV9jZHAgJT4lCiAgICBzZWxlY3QoQ05UWV9OQU1FLFBMQUNFX0ZJUFMsIFBMQUNFX05BTUUsIFBMQUNFX05BTUVfVFlQRSwKICAgICAgICAgICBBTEFSTV9EQVRFLENPTlRfREFURSkgJT4lCiAgICByZW5hbWUoInN0YXJ0X2RhdGUiID0gIkFMQVJNX0RBVEUiLAogICAgICAgICAgICJlbmRfZGF0ZSIgPSAiQ09OVF9EQVRFIiwKICAgICAgICAgICAiY291bnR5X25hbWUiID0gIkNOVFlfTkFNRSIsCiAgICAgICAgICAgInBsYWNlX2ZpcHMiID0gIlBMQUNFX0ZJUFMiLAogICAgICAgICAgICJwbGFjZV9uYW1lIiA9ICJQTEFDRV9OQU1FIiwKICAgICAgICAgICAicGxhY2VfbmFtZV90eXBlIiA9ICJQTEFDRV9OQU1FX1RZUEUiKSAlPiUKICAgIG11dGF0ZShwbGFjZV9maXBzID0gcGFzdGUwKCIwIixwbGFjZV9maXBzKSwKICAgICAgICAgICB0eXBlID0gIldpbGRmaXJlIikgJT4lCiAgICBhcnJhbmdlKGNvdW50eV9uYW1lLHBsYWNlX25hbWUpCgpoZWFkKGZpcmVfY2RwKQoKYGBgCgotIE1ha2Ugc3VyZSB0aGVyZSBpcyBubyBkdXBsaWNhdGVkIGZpcmUgZXZlbnQgaW4gYGZpcmVfY2RwYApgYGB7cn0KZmlyZV9jZHAgPC0gZmlyZV9jZHAgJT4lCiAgICBkaXN0aW5jdCgpCmhlYWQoZmlyZV9jZHApCmBgYAoKIyMjIE9idGFpbiBQU1BTIGV2ZW50cyBkYXRhIGF0IGNvdW50eSBsZXZlbAoKLSBUaGUgZGF0YWZyYW1lIHN0cnVjdHVyZSB3aWxsIGJlICoqZGlmZmVyZW50KiogdGhhbiB0aGUgYGZpcmVfY2RwYAogICAgLSBObyBgcGxhY2VfZmlwc2AsIGBwbGFjZV9uYW1lYCwgYHBsYWNlX25hbWVfdHlwZWAKICAgIApgYGB7cn0KcHNwc19jbnR5IDwtIHJlYWRfY3N2KGhlcmUoImRhdGFfcHJpdmF0ZSIsInBzcHMtZXZlbnRzLWNvdW50eS0yMDE3LTIwMjAuY3N2IikpCmhlYWQocHNwc19jbnR5KQpgYGAKCi0gRm9ybWF0IGBwc3BzX2NudHlgIHN0YXJ0L2VuZCBkYXRlCmBgYHtyfQpwc3BzX2NudHkgPC0gcHNwc19jbnR5ICU+JQogICAgbXV0YXRlKGBQU1BTIFN0YXJ0IERhdGVgID0gYXMuRGF0ZShgUFNQUyBTdGFydCBEYXRlYCwgZm9ybWF0ID0gIiVtLyVkLyV5IiksCiAgICAgICAgICAgYFBTUFMgRW5kIERhdGVgID0gYXMuRGF0ZShgUFNQUyBFbmQgRGF0ZWAsIGZvcm1hdCA9ICIlbS8lZC8leSIpKQpoZWFkKHBzcHNfY250eSkKYGBgCgotIFJlbmFtZSBmaWVsZHMgYW5kIHJlLW9yZ2FuaXplZCBmaWVsZHMgaW4gYHBzcHNfY250eWAKYGBge3J9CnBzcHNfY250eSA8LSBwc3BzX2NudHkgJT4lCiAgICByZW5hbWUoInN0YXJ0X2RhdGUiID0gIlBTUFMgU3RhcnQgRGF0ZSIsCiAgICAgICAgICAgImVuZF9kYXRlIiA9ICJQU1BTIEVuZCBEYXRlIiwKICAgICAgICAgICAiY291bnR5X25hbWUiID0gIkNvdW50eSIpICU+JQogICAgbXV0YXRlKHR5cGUgPSAiUFNQUyIpICU+JQogICAgc2VsZWN0KGNvdW50eV9uYW1lLHN0YXJ0X2RhdGUsZW5kX2RhdGUsdHlwZSkgJT4lCiAgICBhcnJhbmdlKGNvdW50eV9uYW1lKQpuYW1lcyhwc3BzX2NudHkpCmhlYWQocHNwc19jbnR5KQpgYGAKCi0gTWFrZSBzdXJlIHRoZXJlIGlzIG5vIGR1cGxpY2F0ZWQgZmlyZSBldmVudCBpbiBgcHNwc19jbnR5YApgYGB7cn0KcHNwc19jbnR5IDwtIHBzcHNfY250eSAlPiUKICAgIGRpc3RpbmN0KCkKaGVhZChwc3BzX2NudHkpCmBgYAoKIyMgSWRlbnRpZnkgY2l0eS1sZXZlbCBldmVudHMgdXNpbmcgY2l0eSBhbmQgY291bnR5LWxldmVsIHdpbGRmaXJlLXJlbGF0ZWQgZXZlbnRzCgotIEEgZnVuY3Rpb24gdG8ganVkZ2Ugb2Ygb25lIHBvd2VyIG91dGFnZSBldmVudCBpcyB3aWxkZmlyZS1pbmR1Y2VkIG9yIG5vdApgYGB7cn0KIyBGdW5jdGlvbiB0byBjaGVjayBpZiBhIGRhdGUgaXMgd2l0aGluIGEgZ2l2ZW4gcGVyaW9kCmlzX2RhdGVfd2l0aGluX3BlcmlvZCA8LSBmdW5jdGlvbihjaGVja19kYXRlLCBzdGFydF9kYXRlLCBlbmRfZGF0ZSkgewogIGNoZWNrX2RhdGUgPj0gc3RhcnRfZGF0ZSAmIGNoZWNrX2RhdGUgPD0gZW5kX2RhdGUKfQpgYGAKCi0gTG9vcCB0byBhcHBseSB0aGUgZnVuY3Rpb24gYW5kIGZsYWcgaWYgYW4gZXZlbnQgaXMgd2lsZGZpcmUtaW5kdWNlZCBvciBub3QKLSBUaGlzIHRpbWUsIHdlIG5lZWQgdG8gYXBwbHkgZGlmZmVyZW50IHRyZWF0bWVudCBmb3IgUFNQUyBhbmQgd2lsZGZpcmUgZXZlbnRzIGFzIFBTUFMgZGF0YSBpcyBvbmx5IGF2YWlsYWJsZSBhdCAqKmNvdW50eSoqIGxldmVsCgotIEEgZnVuY3Rpb24gdG8ganVkZ2UgaWYgYW4gZXZlbnQgaXMgd2lsZGZpcmUtaW5kdWNlZAoKYGBge3J9CndpbGRmaXJlX2luZHVjZWRfZXZlbnRzIDwtIGZ1bmN0aW9uKGN1cnJfY291bnR5LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjdXJyX2RmX291dGFnZSwgY3Vycl9kZl9maXJlKXsKICAgIGZvciAoaiBpbiAxOm5yb3coY3Vycl9kZl9maXJlKSl7CiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIGNoZWNrX2RhdGUgPC0gY3Vycl9kZl9maXJlJHN0YXJ0X2RhdGVbal0KICAgICAgICAgICAgICAgIHR5cGUgPC0gY3Vycl9kZl9maXJlJHR5cGVbal0KICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgIyBDaGVjayBpZiB0aGUgc3BlY2lmaWMgZGF0ZSBpcyB3aXRoaW4gYW55IG9mIHRoZSBwZXJpb2RzCiAgICAgICAgICAgICAgICByZXN1bHQgPC0gY3Vycl9kZl9vdXRhZ2UgJT4lCiAgICAgICAgICAgICAgICAgIG11dGF0ZSgKICAgICAgICAgICAgICAgICAgICBkYXRlX3dpdGhpbl9wZXJpb2QgPSBpc19kYXRlX3dpdGhpbl9wZXJpb2QoY2hlY2tfZGF0ZSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFN0YXJ0LCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRW5kKSwKICAgICAgICAgICAgICAgICAgKSAlPiUKICAgICAgICAgICAgICAgIGZpbHRlcihkYXRlX3dpdGhpbl9wZXJpb2QgPT0gVFJVRSkgJT4lCiAgICAgICAgICAgICAgICAgICAgbXV0YXRlKHR5cGUgPSB0eXBlKQogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAjIGJpbmQgcm93cyBmb3IgZmluYWwgcmVzdWx0cwogICAgICAgICAgICAgICAgaWYgKGogPT0gMSl7CiAgICAgICAgICAgICAgICAgICAgcmVzdWx0X2JpbmQgPC0gcmVzdWx0CiAgICAgICAgICAgICAgICB9ZWxzZXsKICAgICAgICAgICAgICAgICAgICByZXN1bHRfYmluZCA8LSBiaW5kX3Jvd3MoCiAgICAgICAgICAgICAgICAgICAgICAgIHJlc3VsdF9iaW5kLAogICAgICAgICAgICAgICAgICAgICAgICByZXN1bHQKICAgICAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAKICAgIH0KICAgIAogICAgcmV0dXJuKHJlc3VsdF9iaW5kKQogICAgCn0KYGBgCgotIE9idGFpbiBjZHAtbGV2ZWwgZGF0YSBmb3IgZWFjaCBjb3VudHkKYGBge3J9CmNkcF9maWxlX25hbWVzIDwtIGxpc3QuZmlsZXMoaGVyZSgicmVzdWx0IiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJwb3dlci1vdXRhZ2UtZXZlbnRzLWNpdHktYXQtbGVhc3QtNjBtaW4iKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwYXR0ZXJuID0gIlxcLmNzdiQiLCBpZ25vcmUuY2FzZSA9IFRSVUUpCmNvdW50eV9uYW1lcyA8LSBzdWJzdHIoY2RwX2ZpbGVfbmFtZXMsMSwgCiAgICAgICAgICAgICAgICAgICAgICAgKG5jaGFyKGNkcF9maWxlX25hbWVzKS1uY2hhcigiX2NkcF9wY3RfaG91c2luZ191bml0XzIwMTdfMjAyMC5jc3YiKSkpCmBgYAoKCiMjIyBDaGVjayBpZiBhbnkgb2YgdGhlIGNkcC1sZXZlbCBldmVudCBpcyB3aWxkZmlyZS1pbmR1Y2VkCgoKLSBBcHBseSBqdWRnZSBmdW5jdGlvbiBmb3Igd2lsZGZpcmUgZXZlbnRzCgpgYGB7cn0KZm9yIChpIGluIDE6bGVuZ3RoKGNvdW50eV9uYW1lcykpewogICAgCiAgICBwcmludChwYXN0ZSgiUHJvY2Vzc2luZyIsY291bnR5X25hbWVzW2ldKSkKICAgIAogICAgIyBPYnRhaW4gZGF0YSBmb3IgY2l0eS1sZXZlbCBwb3dlciBvdXRhZ2UKICAgICMgQ2l0eS1sZXZlbCBwb3dlciBvdXRhZ2UgZGF0YSBhcmUgb3JnYW5pemVkIGJ5IGNvdW50aWVzCgogICAgZGZfb3V0YWdlIDwtIHJlYWRfY3N2KGhlcmUoInJlc3VsdCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAicG93ZXItb3V0YWdlLWV2ZW50cy1jaXR5LWF0LWxlYXN0LTYwbWluIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhc3RlKGNvdW50eV9uYW1lc1tpXSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJjZHBfcGN0X2hvdXNpbmdfdW5pdF8yMDE3XzIwMjAuY3N2IiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlcCA9ICJfIikpKQogICAgCiAgICBpZihucm93KGRmX291dGFnZSk+MCl7CiAgICAgICAgCiAgICAgICAgZGZfb3V0YWdlIDwtIGRmX291dGFnZSAlPiUKICAgICAgICAgICAgYXJyYW5nZShTdGFydCkKICAgICAgICAKICAgICAgICBkZl9maXJlIDwtIGZpcmVfY2RwICU+JQogICAgICAgICAgICBmaWx0ZXIoY291bnR5X25hbWUgPT0gY291bnR5X25hbWVzW2ldKSAlPiUKICAgICAgICAgICAgYXJyYW5nZShzdGFydF9kYXRlLCBjb3VudHlfbmFtZSkKICAgICAgICAKICAgICAgICBpZihucm93KGRmX2ZpcmUpPjApewogICAgICAgICAgICBjdXJyX3Jlc3VsdCA8LSB3aWxkZmlyZV9pbmR1Y2VkX2V2ZW50cyhjb3VudHlfbmFtZVtpXSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkZl9vdXRhZ2UsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZGZfZmlyZSkgICAgICAgICAgICAKICAgICAgICB9CiAgICAgICAgCiAgICAjIGJpbmQgcmVzdWx0cyBmb3IgY291bnRpZXMgdG9nZXRoZXIKICAgIGlmKGk9PTEpewogICAgICAgIG91dF9kZl93aWxkZmlyZSA8LSBjdXJyX3Jlc3VsdAogICAgfWVsc2V7CiAgICAgICAgb3V0X2RmX3dpbGRmaXJlIDwtIGJpbmRfcm93cyhvdXRfZGZfd2lsZGZpcmUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjdXJyX3Jlc3VsdCkKICAgIH0gICAgCiAgICAgICAgCgogICAgICAgIAogICAgICAgIAogICAgICAgIAogICAgfQogICAgCiAgICAKfQoKYGBgCgojIyMgQ2hlY2sgaWYgYW55IG9mIHRoZSBjZHAtbGV2ZWwgZXZlbnQgaXMgUFNQUy1pbmR1Y2VkCgotIEFwcGx5IHRoZSBmdW5jdGlvbiB0byBkZXRlcm1pbmUgaWYgYSBwb3dlciBvdXRhZ2UgZXZlbnQgaXMgYSB3aWxkZmlyZS1pbmR1Y2VkIG9uZQpgYGB7cn0KZm9yIChpIGluIDE6bGVuZ3RoKGNvdW50eV9uYW1lcykpewogICAgCiAgICBwcmludChwYXN0ZSgiUHJvY2Vzc2luZyIsY291bnR5X25hbWVzW2ldKSkKICAgIAogICAgIyBPYnRhaW4gZGF0YSBmb3IgY2l0eS1sZXZlbCBwb3dlciBvdXRhZ2UKICAgICMgQ2l0eS1sZXZlbCBwb3dlciBvdXRhZ2UgZGF0YSBhcmUgb3JnYW5pemVkIGJ5IGNvdW50aWVzCgogICAgZGZfb3V0YWdlIDwtIHJlYWRfY3N2KGhlcmUoInJlc3VsdCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAicG93ZXItb3V0YWdlLWV2ZW50cy1jaXR5LWF0LWxlYXN0LTYwbWluIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhc3RlKGNvdW50eV9uYW1lc1tpXSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICJjZHBfcGN0X2hvdXNpbmdfdW5pdF8yMDE3XzIwMjAuY3N2IiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlcCA9ICJfIikpKQogICAgCiAgICBpZihucm93KGRmX291dGFnZSk+MCl7CiAgICAgICAgCiAgICAgICAgZGZfb3V0YWdlIDwtIGRmX291dGFnZSAlPiUKICAgICAgICAgICAgYXJyYW5nZShTdGFydCkKICAgICAgICAKICAgICAgICBkZl9maXJlIDwtIHBzcHNfY250eSAlPiUKICAgICAgICAgICAgZmlsdGVyKGNvdW50eV9uYW1lID09IGNvdW50eV9uYW1lc1tpXSkgJT4lCiAgICAgICAgICAgIGFycmFuZ2Uoc3RhcnRfZGF0ZSwgY291bnR5X25hbWUpCiAgICAgICAgCiAgICAgICAgaWYobnJvdyhkZl9maXJlKT4wKXsKICAgICAgICAgICAgY3Vycl9yZXN1bHQgPC0gd2lsZGZpcmVfaW5kdWNlZF9ldmVudHMoY291bnR5X25hbWVbaV0sCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZGZfb3V0YWdlLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRmX2ZpcmUpICAgICAgICAgICAgCiAgICAgICAgfQogICAgICAgIAogICAgIyBiaW5kIHJlc3VsdHMgZm9yIGNvdW50aWVzIHRvZ2V0aGVyCiAgICBpZihpPT0xKXsKICAgICAgICBvdXRfZGZfcHNwcyA8LSBjdXJyX3Jlc3VsdAogICAgfWVsc2V7CiAgICAgICAgb3V0X2RmX3BzcHMgPC0gYmluZF9yb3dzKG91dF9kZl9wc3BzLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgY3Vycl9yZXN1bHQpCiAgICB9ICAgIAogICAgICAgIAoKICAgICAgICAKICAgICAgICAKICAgICAgICAKICAgIH0KICAgIAogICAgCn0KCmBgYAoKIyMgTm90ZSBvbiByZXN1bHRzCi0gQm90aCBgb3V0X2RmX3dpbGRmaXJlYCBhbmQgYG91dF9kZl9wc3BzYCBhcmUgZW1wdHksIGluZGljYXRpbmcgbm8gdmFsaWQgcmVzdWx0cyBhcmUgYXZhaWxhYmxlIGFuZCBjYW4gYmUgbWFya2VkIGFzIFBTUFMgb3Igd2lsZGZpcmUtaW5kdWNlZC4KLSBUaGlzIG5lZWRzIGZ1cnRoZXIgaW52ZXN0aWdhdGlvbiwgaW5jbHVkaW5nCiAgICAtIENoZWNraW5nIHRoZSBsb25nIGZvcm0gb2YgdGltZSBzZXJpZXMKICAgIC0gQ2hlY2tpbmcgdGhlIHRocmVzaG9sZCBhbmQgb3RoZXIgcGFyYW1ldGVycyBhcHBsaWVkIHRvIGlkZW50aWZ5IGNpdHktbGV2ZWwgZXZlbnRzCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiR2VuZXJhdGUgYSBjYWxlbmRhciBoZWF0bWFwIGZvciBhbGwgY2l0eS1sZXZlbCBwb3dlciBvdXRhZ2VzIGluIENhbGlmb3JuaWEiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgbm90ZWJvb2sgZ2VuZXJhdGVzIGEgY2FsZW5kYXIgaGVhdCBtYXAgZm9yIGFsbCBjb3VudHktbGV2ZWwgYW5kIGNpdHktbGV2ZWwgcG93ZXIgb3V0YWdlIGV2ZW50cyBpbiBDYWxpZm9ybmlhIGZyb20gMjAxNyB0byAyMDIwCgpgYGB7ciBzZXR1cCwgd2FybmluZz1GQUxTRX0KIyBsb2FkaW5nIGxpYnJhcmllcwpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeSh6b28pCmxpYnJhcnkoZm9yZWlnbikKbGlicmFyeShoZXJlKQpsaWJyYXJ5KHB1cnJyKQpsaWJyYXJ5KGx1YnJpZGF0ZSkKbGlicmFyeShnZ3RoZW1lcykKbGlicmFyeShocmJydGhlbWVzKQpsaWJyYXJ5KGNsYXNzSW50KQpsaWJyYXJ5KHN0cmluZ3IpCmBgYAoKCi0gQ2xlYW4gd29ya3NwYWNlCmBgYHtyfQpybShsaXN0ID0gbHMoKSkKYGBgCgoKIyMgUHJlcGFyZSBkYXRhIGZvciBwbG90dGluZwoKLSBCaW5kIHJvd3Mgb2YgYWxsIGV2ZW50cyBhdCBjaXR5IGxldmVsCmBgYHtyfQpjZHBfZmlsZV9uYW1lcyA8LSBsaXN0LmZpbGVzKGhlcmUoInJlc3VsdCIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAicG93ZXItb3V0YWdlLWV2ZW50cy1jaXR5LWF0LWxlYXN0LTYwbWluIiksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcGF0dGVybiA9ICJcXC5jc3YkIiwgaWdub3JlLmNhc2UgPSBUUlVFKQpjb3VudHlfbmFtZXMgPC0gc3Vic3RyKGNkcF9maWxlX25hbWVzLDEsIAogICAgICAgICAgICAgICAgICAgICAgIChuY2hhcihjZHBfZmlsZV9uYW1lcyktbmNoYXIoIl9jZHBfcGN0X2hvdXNpbmdfdW5pdF8yMDE3XzIwMjAuY3N2IikpKQoKaGVyZSgicmVzdWx0IiwicG93ZXItb3V0YWdlLWV2ZW50cy1jaXR5LWF0LWxlYXN0LTYwbWluIiwKICAgICAgICAgICAgICAgIGNkcF9maWxlX25hbWVzKSAlPiUKICAgIG1hcF9kZnIocmVhZF9jc3YpIC0+IGRmX2NkcAogICAgCmBgYAoKCi0gVXNlIHRoZSBzZWxlY3RlZCBwb3dlciBvdXRhZ2UgaW5mbyBhYm92ZSBhbmQgdGhlIGxvbmctZm9ybSBkYXRhIHRvIGdlbmVyYXRlIGEgbmV3IHZlcnNpb24gb2YgbG9uZy1mb3JtIGRhdGEgd2l0aCBjdXN0b21lcnMgb3V0IG9mIHBvd2VyCgoKYGBge3J9CiMgR2V0IGNkcCBhbmQgY291bnR5IG5hbWVzCmNvdW50eV9jZHBfbmFtZXMgPC0gZGZfY2RwICU+JQogICAgZGlzdGluY3QoQ0RQLCBDb3VudHkpCmNvdW50eV9uYW1lcyA8LSB1bmlxdWUoY291bnR5X2NkcF9uYW1lcyRDb3VudHkpCmBgYAoKCmBgYHtyfQpmb3IgKGkgaW4gMTpsZW5ndGgoY291bnR5X25hbWVzKSl7CiAgICAKICAgIHByaW50KHBhc3RlKCJQcm9jZXNzaW5nIixjb3VudHlfbmFtZXNbaV0pKQogICAgY3Vycl9sZiA8LSByZWFkUkRTKGhlcmUoInJlc3VsdCIsImxvbmdfZm9ybV9taXNzaW5nX2ZsZ19maXhlZF9jaXR5IiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwYXN0ZTAoY291bnR5X25hbWVzW2ldLCJfbG9uZ19mb3JtLlJEUyIpKSkKICAgIAogICAgY2RwX25hbWVzIDwtIGNvdW50eV9jZHBfbmFtZXMgJT4lCiAgICAgICAgZmlsdGVyKENvdW50eSA9PSBjb3VudHlfbmFtZXNbaV0pICU+JQogICAgICAgIHNlbGVjdChDRFApCiAgICBjZHBfbmFtZXMgPC0gY2RwX25hbWVzJENEUAogICAgCiAgICAjIGdldCBhIHN1YnNldCBvZiBwb3dlciBvdXRhZ2UgZXZlbnRzCiAgICBjdXJyX29vcCA8LSBkZl9jZHAgJT4lCiAgICAgICAgZmlsdGVyKENvdW50eSA9PSBjb3VudHlfbmFtZXNbaV0gJiBDRFAgJWluJSBjZHBfbmFtZXMpCiAgICAKICAgICMgc3Vic2V0IGxvbmcgZm9ybSB0byBrZWVwIHRoZSBzZWxlY3RlZCBwb3dlciBvdXRhZ2UgZXZlbnRzCiAgICBjdXJyX2xmX2NsZWFuIDwtIGN1cnJfbGYgJT4lCiAgICAgICAgbXV0YXRlKEN1c3RvbWVyc091dCA9IGlmZWxzZShkYXRlID49IGN1cnJfb29wJFN0YXJ0ICYgZGF0ZSA8PSBjdXJyX29vcCRFbmQsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDdXN0b21lcnNPdXQsIDApLAogICAgICAgICAgICAgICBUb3RhbEhVID0gZmlyc3QoY3Vycl9vb3AkVG90YWxIVSkpCiAgICAKICAgIHJtKGN1cnJfbGYpCiAgICAKICAgIGlmKGkgPT0gMSl7CiAgICAgICAgbGZfY250eV9jbGVhbiA8LSBjdXJyX2xmX2NsZWFuCiAgICB9ZWxzZXsKICAgICAgICBsZl9jbnR5X2NsZWFuIDwtIGJpbmRfcm93cyhsZl9jbnR5X2NsZWFuLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGN1cnJfbGZfY2xlYW4pCiAgICB9CiAgICAKfQoKYGBgCgotIFNhdmUgdGhpcyBsYXJnZSBsb25nLWZvcm0gZmlsZSBhcyBhIFJEUyBmaWxlIGluIGNhc2UgbmVlZGVkIGluIHRoZSBmdXR1cmUKYGBge3J9CndyaXRlX3JkcyhsZl9jbnR5X2NsZWFuLCBoZXJlKCJyZXN1bHQiLCJsb25nLWZvcm0tY2xlYW4tY2l0eS1jb3VudHkuUkRTIikpCmBgYAoKCi0gR2VuZXJhdGUgYFllYXJgLGBNb250aGAsYERheWAgZm9yIGNhbGVuZGFyIGhlYXRtYXAKCmBgYHtyfQpsZl9jbnR5X2NsZWFuIDwtIGxmX2NudHlfY2xlYW4gJT4lCiAgICBtdXRhdGUoCiAgICB5ZWFyID0gbHVicmlkYXRlOjp5ZWFyKGRhdGUpLAogICAgbW9udGggPSBsdWJyaWRhdGU6Om1vbnRoKGRhdGUpLAogICAgZGF5ID0gIGx1YnJpZGF0ZTo6ZGF5KGRhdGUpLAogICAgaG91ciA9IGx1YnJpZGF0ZTo6aG91cihkYXRlKSwKICAgIG1pbnV0ZSA9IDEwICogZmxvb3IobHVicmlkYXRlOjptaW51dGUoZGF0ZSkgLyAxMCkKICApICU+JQogIG11dGF0ZSh5bWQgPSBsdWJyaWRhdGU6OnltZChzcHJpbnRmKAogICAgIiVzLSVzLSVzIiwKICAgIHllYXIsCiAgICBtb250aCwKICAgIGRheQogICkpLAogIG1kID0gZm9ybWF0KGFzLkRhdGUoeW1kKSwgIiVtLSVkIikpICU+JQogIHNlbGVjdCgtbWludXRlLCAtaG91ciwgLWRheSwgLW1vbnRoKQoKYGBgCgotIEdldCBhIHRvdGFsIG51bWJlciBvZiBob3VzaW5nIHVuaXRzIGluIENhbGlmb3JuaWEKYGBge3J9CiMgY2FfdG90X2h1IDwtIHN1bSh1bmlxdWUoZGZfY250eSRUb3RhbEhVKSkKY2FfdG90X2h1IDwtIDI2ODgzMTAzODcKYGBgCgotIEFnZ3JlZ2F0ZSBkYXRhIGZvciBjYWxlbmRhciBoZWF0bWFwCgpgYGB7cn0KCmxmX2NudHlfY2xlYW5fc3VtIDwtIGxmX2NudHlfY2xlYW4gJT4lCiAgZ3JvdXBfYnkoeW1kKSAlPiUKICBzdW1tYXJpc2UoQ3VzdG9tZXJzT3V0ID0gc3VtKEN1c3RvbWVyc091dCxuYS5ybSA9IFRSVUUpLAogICAgICAgICAgICB5ZWFyID0gZmlyc3QoeWVhciksCiAgICAgICAgICAgIG1kID0gZmlyc3QobWQpLAogICAgICAgICAgICB5bWQgPSBmaXJzdCh5bWQpKSAlPiUKICB1bmdyb3VwKCkgJT4lCiAgICBtdXRhdGUoUGN0Q3VzdG9tZXJPdXQ9IEN1c3RvbWVyc091dC9jYV90b3RfaHUqMTAwLAogICAgICAgICAgIHllYXIgPSBhcy5udW1lcmljKGZvcm1hdCh5bWQsIGZvcm1hdCA9IiVZIikpLAogICAgICAgICAgIG1kID0gZm9ybWF0KHltZCwgZm9ybWF0ID0iJW0tJWQiKSkKCmBgYAoKLSBBZ2dyZWdhdGUgZGF0YSBieSB3ZWVrIGZvciBjYWxlbmRhciBoZWF0bWFwCmBgYHtyfQoKbGZfY250eV9jbGVhbl9zdW1fd2sgPC0gbGZfY250eV9jbGVhbiAlPiUKICAgIG11dGF0ZShtb250aCA9IGZvcm1hdCh5bWQsZm9ybWF0ID0gIiViIiksCiAgICAgICAgICAgd2VlayA9IGZvcm1hdCh5bWQsIGZvcm1hdCA9ICIlVyIpKSAlPiUKICBncm91cF9ieSh3ZWVrLHllYXIpICU+JQogIHN1bW1hcmlzZShDdXN0b21lcnNPdXQgPSBzdW0oQ3VzdG9tZXJzT3V0LG5hLnJtID0gVFJVRSksCiAgICAgICAgICAgIG1vbnRoID0gZmlyc3QobW9udGgpLAogICAgICAgICAgICB5bWQgPSBmaXJzdCh5bWQpKSAlPiUKICB1bmdyb3VwKCkgJT4lCiAgICBtdXRhdGUoUGN0Q3VzdG9tZXJPdXQ9IEN1c3RvbWVyc091dC9jYV90b3RfaHUqMTAwKQoKYGBgCi0gUmVtb3ZlIHdlZWsgYDAwYApgYGB7cn0KbGZfY250eV9jbGVhbl9zdW1fd2sgPC0gbGZfY250eV9jbGVhbl9zdW1fd2sgJT4lCiAgICBmaWx0ZXIoIXdlZWsgJWluJSBjKCcwMCcsJzUzJykgJiB5bWQgPj0gYXMuRGF0ZSgiMjAxNy0xMC0wMSIpKQpgYGAKCi0gU2V0IHRoZSBkYXRhIG9mIDIwMTcgYmVmb3JlIHRoZSBmaXJzdCBub24temVybyB2YWx1ZSBhcyBgTkFgIGFzIHRoaXMgZGF0YXNldCBkb2VzIG5vdCBiZWdpbiB1bnRpbCBPY3QuIDIwMTcKCmBgYHtyfQppZHhfbm96ZXJvIDwtIHdoaWNoKGxmX2NudHlfY2xlYW5fc3VtX3drJEN1c3RvbWVyc091dCA+MCApCmxmX2NudHlfY2xlYW5fc3VtX3drIDwtIGxmX2NudHlfY2xlYW5fc3VtX3drW2lkeF9ub3plcm9bMV06aWR4X25vemVyb1tsZW5ndGgoaWR4X25vemVybyldLF0KYGBgCgojIyBDcmVhdGUgY2FsZW5kYXIgaGVhdG1hcCBwbG90CgotIFByZXBhcmUgYSBmdW5jdGlvbiB0byBjcmVhdGUgYmVhdXRpZnVsIGJyZWFrcwpgYGB7cn0KICBjYWN1bGF0ZV9jbGFzcyA8LSBmdW5jdGlvbih2YXIsbmNsYXNzKXsKICAgICMgbGlicmFyeShwbHlyKQogICAgY2xhc3NfYnJrcyA8LSBjbGFzc0ludGVydmFscyh2YXIsIG4gPSBuY2xhc3MsaW50ZXJ2YWxDbG9zdXJlID0gImxlZnQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdHlsZSA9ICJwcmV0dHkiKQogICAgIyBjbGFzcyA8LSByb3VuZF9hbnkoY2xhc3NfYnJrcyRicmtzLDUpCiAgICBjbGFzcyA8LSBjbGFzc19icmtzJGJya3MKICAgIAogICAgcmV0dXJuKGNsYXNzKQogIH0KYGBgCgojIyMgQ3JlYXRlIGNhbGVuZGFyIGhlYXRtYXAgZm9yIHdlZWtseSBhZ2dyZWdhdGlvbgoKLSBQcmVwYXJlIGEgdmVjdG9yIGZvciBYLWF4aXMgbGFiZWwKYGBge3J9CmRmX21vX3drIDwtIGxmX2NudHlfY2xlYW5fc3VtX3drICU+JQogICAgZ3JvdXBfYnkod2VlaykgJT4lCiAgICBzdW1tYXJpc2UobW9udGggPSBmaXJzdChtb250aCkpCgp3ZWVrX2JyZWFrcyA8LSBkZl9tb193ayR3ZWVrCgp3ZWVrX2xhYmVscyA8LSByZXAoIiIsbnJvdyhkZl9tb193aykpCndlZWtfbGFiZWxzW3NlcSgxOihucm93KGRmX21vX3drKS80KSkqNC0yXSA9IAogICAgZGZfbW9fd2skbW9udGhbc2VxKDE6KG5yb3coZGZfbW9fd2spLzQpKSo0LTJdCmBgYAoKLSBQbG90IGhlYXRtYXAKYGBge3J9CmxmX2NudHlfY2xlYW5fc3VtX3drICU+JQogIGdncGxvdChhZXMoeD13ZWVrLCB5PXllYXIsIGZpbGw9IFBjdEN1c3RvbWVyT3V0KSkgKyAKICBnZW9tX3RpbGUoY29sb3IgPSAid2hpdGUiLHNpemUgPSAwLjEpKwogIHNjYWxlX2ZpbGxfZGlzdGlsbGVyKHBhbGV0dGUgPSAiWWxHbkJ1Iix0cmFucyA9ICJyZXZlcnNlIixuYW1lPSIlIEN1c3RvbWVyc1xubG9zdCBwb3dlciIsCiAgICAgICAgICAgICAgICAgICAgICAgYnJlYWtzID0gY2FjdWxhdGVfY2xhc3MobGZfY250eV9jbGVhbl9zdW0kUGN0Q3VzdG9tZXJPdXQsNCksCiAgICAgICAgICAgICAgICAgICAgICAgbGFiZWxzID0gY2FjdWxhdGVfY2xhc3MobGZfY250eV9jbGVhbl9zdW0kUGN0Q3VzdG9tZXJPdXQsNCkpICsKICBzY2FsZV94X2Rpc2NyZXRlKGJyZWFrcyA9IHdlZWtfYnJlYWtzLAogICAgICAgICAgICAgICAgICAgbGFiZWxzID0gd2Vla19sYWJlbHMpICsKCiAgc2NhbGVfeV9yZXZlcnNlKCkrCiAgdGhlbWVfaXBzdW0oKSsKICB0aGVtZShheGlzLnRpdGxlLnggPSBlbGVtZW50X2JsYW5rKCksCiAgICAgICAgYXhpcy50aXRsZS55ID0gZWxlbWVudF9ibGFuaygpLAogICAgICAgIHBhbmVsLmdyaWQubWFqb3IgPSBlbGVtZW50X2xpbmUoY29sb3IgPSAiI2NjY2NjYyIsc2l6ZSA9IDAuMSkpKwogIGdndGl0bGUoIiUgQ3VzdG9tZXJzIGV4cGVyaWVuY2luZyBjaXR5LWxldmVsIHBvd2VyIG91dGFnZXMgaW4gQ2FsaWZvcm5pYSBlYWNoIHdlZWsiKSAtPiBjYV9oZWF0bWFwCgpjYV9oZWF0bWFwCmBgYAoKLSBTYXZlIHJlc3VsdHMKYGBge3J9Cmdnc2F2ZSgKICBoZXJlKCJwbG90IiwiMDJfY2FfcG93ZXJfb3V0YWdlX2NpdHlfbGV2ZWxfY2FsZW5kYXJfaGVhdG1hcC5wbmciKSwKICBjYV9oZWF0bWFwLAogICMgZGV2aWNlID0gY2Fpcm9fcGRmLAogIHdpZHRoID0gOSwKICBoZWlnaHQgPSA2LAogIHNjYWxlID0gMQopCmBgYAo=</div>
 
 
 
@@ -2240,7 +2047,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("09_county_wildfire_induced_poweroutage.Rmd");
+  window.initializeSourceEmbed("10_ca_city_calendar_heatmap.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
