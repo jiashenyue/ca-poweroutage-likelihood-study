@@ -84,6 +84,10 @@ Ambient power outages occur often and not all of them are qualified as a power o
 
 ![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/04_county-pct-customers-duration-out-of-power.png)
 
+- Spatial aggregation of out of power patterns
+
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/05_bi-variate-customermin-pctcustomerout.png)
+
 ## Wildfire-induced power outages at county level
 
 - [CSV file for county-level power outage events](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/county-outage-events-by-type.csv) with `type` equals to
