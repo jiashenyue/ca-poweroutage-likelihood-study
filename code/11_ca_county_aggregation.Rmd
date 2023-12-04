@@ -38,10 +38,39 @@ df_outage <- read_csv(here("result","county-outage-events-by-type.csv"))
 ```
 
 ## Prepare aggregated results
-
 - Total count of events by county
 ```{r}
 df_outage_cnty_cnt <- df_outage %>%
+    group_by(County) %>%
+    summarise(Count = n(),
+              TotalHU = first(TotalHU),
+              CustomerOut = sum(SegCustomerOut),
+              CustomerMinutes = sum(SegCustomerMinutes),
+              MedCustomerMinutes = median(SegCustomerMinutes),
+              MinCustomerMinutes = min(SegCustomerMinutes),
+              MaxCustomerMinutes = max(SegCustomerMinutes),
+              AvgCustomerMinutes = mean(SegCustomerMinutes),
+              MedCustomerOut = median(SegCustomerOut),
+              MinCustomerOut = min(SegCustomerOut),
+              MaxCustomerOut = max(SegCustomerOut),
+              AvgCustomerOut = mean(SegCustomerOut),
+              TotalDuration = sum(Duration),
+              AvgDuration = mean(Duration),
+              MedDuration = median(Duration),
+              MaxDuration = max(Duration),
+              MinDuration = min(Duration),
+              PctCustomerOut = CustomerOut/(4*TotalHU),
+              PctDuration = round(TotalDuration/(525600*4),4)*100)
+```
+
+```{r}
+write_csv(df_outage_cnty_cnt, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-2017-2020.csv"))
+```
+
+- Total count of events by county and type
+```{r}
+df_outage_cnty_type_cnt <- df_outage %>%
     group_by(County, type) %>%
     summarise(Count = n(),
               TotalHU = first(TotalHU),
@@ -79,8 +108,32 @@ ca_total_hu <- sum(df_hu$TotalHU)
 
 
 ```{r}
-write_csv(df_outage_cnty_cnt, here("result","county-aggregation-results",
-                                   "county-poweroutage-count-2017-2020.csv"))
+write_csv(df_outage_cnty_type_cnt, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-type-2017-2020.csv"))
+```
+
+- Total count of events: `PSPS`
+```{r}
+df_outage_psps <- df_outage_cnty_type_cnt %>%
+    filter(type %in% c("PSPS"))
+write_csv(df_outage_psps, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-psps-2017-2020.csv"))
+```
+
+- Total count of events: `Wildfire`
+```{r}
+df_outage_wildfire <- df_outage_cnty_type_cnt %>%
+    filter(type %in% c("Wildfire"))
+write_csv(df_outage_wildfire, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-wildfire-2017-2020.csv"))
+```
+
+- Total count of events: `Not Wildfire-induced`
+```{r}
+df_outage_notwildfire <- df_outage_cnty_type_cnt %>%
+    filter(type %in% c("Not Wildfire-induced"))
+write_csv(df_outage_notwildfire, here("result","county-aggregation-results",
+                                   "county-poweroutage-count-not-wildfire-2017-2020.csv"))
 ```
 
 - Total count of events by months
