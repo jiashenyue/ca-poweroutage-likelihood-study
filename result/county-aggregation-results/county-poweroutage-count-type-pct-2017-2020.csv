@@ -1,0 +1,132 @@
+County,type,count,total_count,pct_total
+Alameda,Not Wildfire-induced,77,79,97.47
+Alameda,Wildfire,2,79,2.53
+Alpine,Not Wildfire-induced,13,15,86.67
+Alpine,PSPS,2,15,13.33
+Amador,Not Wildfire-induced,90,91,98.9
+Amador,PSPS,1,91,1.0999999999999999
+Butte,Not Wildfire-induced,127,139,91.36999999999999
+Butte,PSPS,7,139,5.04
+Butte,Wildfire,5,139,3.5999999999999996
+Calaveras,Not Wildfire-induced,80,84,95.24000000000001
+Calaveras,PSPS,4,84,4.760000000000001
+Colusa,Not Wildfire-induced,15,20,75
+Colusa,PSPS,5,20,25
+Contra Costa,Not Wildfire-induced,76,77,98.7
+Contra Costa,Wildfire,1,77,1.3
+Del Norte,Not Wildfire-induced,30,30,100
+El Dorado,Not Wildfire-induced,172,178,96.63000000000001
+El Dorado,PSPS,5,178,2.81
+El Dorado,Wildfire,1,178,0.5599999999999999
+Fresno,Not Wildfire-induced,100,101,99.00999999999999
+Fresno,PSPS,1,101,0.9900000000000001
+Glenn,Not Wildfire-induced,29,34,85.28999999999999
+Glenn,PSPS,4,34,11.76
+Glenn,Wildfire,1,34,2.94
+Humboldt,Not Wildfire-induced,113,114,99.11999999999999
+Humboldt,PSPS,1,114,0.88
+Imperial,Not Wildfire-induced,9,9,100
+Inyo,Not Wildfire-induced,5,5,100
+Kern,Not Wildfire-induced,158,165,95.76
+Kern,PSPS,5,165,3.0300000000000002
+Kern,Wildfire,2,165,1.21
+Kings,Not Wildfire-induced,60,60,100
+Lake,Not Wildfire-induced,75,79,94.94
+Lake,PSPS,2,79,2.53
+Lake,Wildfire,2,79,2.53
+Lassen,Not Wildfire-induced,17,17,100
+Los Angeles,Not Wildfire-induced,22,29,75.86
+Los Angeles,PSPS,1,29,3.45
+Los Angeles,Wildfire,6,29,20.69
+Madera,Not Wildfire-induced,89,90,98.89
+Madera,PSPS,1,90,1.11
+Marin,Not Wildfire-induced,126,130,96.92
+Marin,PSPS,3,130,2.31
+Marin,Wildfire,1,130,0.77
+Mariposa,Not Wildfire-induced,47,50,94
+Mariposa,PSPS,1,50,2
+Mariposa,Wildfire,2,50,4
+Mendocino,Not Wildfire-induced,92,96,95.83
+Mendocino,PSPS,3,96,3.1199999999999997
+Mendocino,Wildfire,1,96,1.04
+Merced,Not Wildfire-induced,93,94,98.94
+Merced,PSPS,1,94,1.06
+Modoc,Not Wildfire-induced,1,1,100
+Mono,Not Wildfire-induced,39,41,95.12
+Mono,PSPS,1,41,2.44
+Mono,Wildfire,1,41,2.44
+Monterey,Not Wildfire-induced,176,177,99.44
+Monterey,Wildfire,1,177,0.5599999999999999
+Napa,Not Wildfire-induced,122,134,91.03999999999999
+Napa,PSPS,8,134,5.970000000000001
+Napa,Wildfire,4,134,2.9899999999999998
+Nevada,Not Wildfire-induced,99,103,96.12
+Nevada,PSPS,4,103,3.88
+Orange,Not Wildfire-induced,19,22,86.36
+Orange,PSPS,1,22,4.55
+Orange,Wildfire,2,22,9.09
+Placer,Not Wildfire-induced,103,110,93.64
+Placer,PSPS,7,110,6.36
+Plumas,Not Wildfire-induced,40,43,93.02
+Plumas,PSPS,1,43,2.33
+Plumas,Wildfire,2,43,4.65
+Riverside,Not Wildfire-induced,68,73,93.15
+Riverside,PSPS,1,73,1.37
+Riverside,Wildfire,4,73,5.48
+Sacramento,Not Wildfire-induced,43,43,100
+San Benito,Not Wildfire-induced,18,18,100
+San Bernardino,Not Wildfire-induced,106,110,96.36
+San Bernardino,PSPS,2,110,1.82
+San Bernardino,Wildfire,2,110,1.82
+San Diego,Not Wildfire-induced,25,34,73.53
+San Diego,PSPS,5,34,14.71
+San Diego,Wildfire,4,34,11.76
+San Francisco,Not Wildfire-induced,61,61,100
+San Joaquin,Not Wildfire-induced,80,82,97.56
+San Joaquin,Wildfire,2,82,2.44
+San Luis Obispo,Not Wildfire-induced,124,125,99.2
+San Luis Obispo,Wildfire,1,125,0.8
+San Mateo,Not Wildfire-induced,90,94,95.74000000000001
+San Mateo,PSPS,1,94,1.06
+San Mateo,Wildfire,3,94,3.19
+Santa Barbara,Not Wildfire-induced,168,168,100
+Santa Clara,Not Wildfire-induced,78,80,97.5
+Santa Clara,Wildfire,2,80,2.5
+Santa Cruz,Not Wildfire-induced,174,177,98.31
+Santa Cruz,PSPS,1,177,0.5599999999999999
+Santa Cruz,Wildfire,2,177,1.13
+Shasta,Not Wildfire-induced,105,114,92.11
+Shasta,PSPS,6,114,5.26
+Shasta,Wildfire,3,114,2.63
+Sierra,Not Wildfire-induced,45,50,90
+Sierra,PSPS,4,50,8
+Sierra,Wildfire,1,50,2
+Siskiyou,Not Wildfire-induced,58,60,96.67
+Siskiyou,PSPS,1,60,1.67
+Siskiyou,Wildfire,1,60,1.67
+Solano,Not Wildfire-induced,132,136,97.06
+Solano,PSPS,4,136,2.94
+Sonoma,Not Wildfire-induced,145,158,91.77
+Sonoma,PSPS,8,158,5.06
+Sonoma,Wildfire,5,158,3.16
+Stanislaus,Not Wildfire-induced,17,17,100
+Sutter,Not Wildfire-induced,27,27,100
+Tehama,Not Wildfire-induced,87,92,94.57
+Tehama,PSPS,4,92,4.35
+Tehama,Wildfire,1,92,1.09
+Trinity,Not Wildfire-induced,17,19,89.47
+Trinity,PSPS,2,19,10.530000000000001
+Tulare,Not Wildfire-induced,112,113,99.11999999999999
+Tulare,Wildfire,1,113,0.88
+Tuolumne,Not Wildfire-induced,101,103,98.06
+Tuolumne,PSPS,1,103,0.97
+Tuolumne,Wildfire,1,103,0.97
+Ventura,Not Wildfire-induced,123,142,86.61999999999999
+Ventura,PSPS,9,142,6.34
+Ventura,Wildfire,10,142,7.04
+Yolo,Not Wildfire-induced,87,90,96.67
+Yolo,PSPS,2,90,2.22
+Yolo,Wildfire,1,90,1.11
+Yuba,Not Wildfire-induced,60,64,93.75
+Yuba,PSPS,3,64,4.6899999999999995
+Yuba,Wildfire,1,64,1.5599999999999998

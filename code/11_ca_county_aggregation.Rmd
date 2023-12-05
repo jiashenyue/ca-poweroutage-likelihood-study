@@ -38,6 +38,8 @@ df_outage <- read_csv(here("result","county-outage-events-by-type.csv"))
 ```
 
 ## Prepare aggregated results
+
+### `Count` and `type`
 - Total count of events by county
 ```{r}
 df_outage_cnty_cnt <- df_outage %>%
@@ -111,6 +113,25 @@ ca_total_hu <- sum(df_hu$TotalHU)
 write_csv(df_outage_cnty_type_cnt, here("result","county-aggregation-results",
                                    "county-poweroutage-count-type-2017-2020.csv"))
 ```
+
+- Percent count of each `type` of power outages
+```{r}
+df_cnt_pct_type_sum <- df_outage %>%
+    group_by(County) %>%
+    summarise(total_count = n())
+
+df_cnt_pct_type <- df_outage %>%
+    group_by(County, type) %>%
+    summarise(count = n()) %>%
+    left_join(df_cnt_pct_type_sum, by = c("County")) %>%
+    mutate(pct_total = round(count/total_count,4)*100)
+```
+
+```{r}
+write_csv(df_cnt_pct_type, here("result","county-aggregation-results",
+                                "county-poweroutage-count-type-pct-2017-2020.csv"))
+```
+
 
 - Total count of events: `PSPS`
 ```{r}
