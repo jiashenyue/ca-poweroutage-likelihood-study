@@ -124,16 +124,57 @@ df_cnt_pct_type <- df_outage %>%
     group_by(County, type) %>%
     summarise(count = n()) %>%
     left_join(df_cnt_pct_type_sum, by = c("County")) %>%
-    mutate(pct_total = round(count/total_count,4)*100)
+    mutate(pct_total = round(count/total_count,4)*100) %>%
+    ungroup()
 
 df_cnt_pct_type <- df_cnt_pct_type %>%
-    expand(nesting(type),
-           count, pct_total)
+    complete(County, type) %>%
+    fill(total_count) %>%
+    mutate(count = ifelse(is.na(count),0,count),
+           # total_count = ifelse(is.na(total_count),total_count,total_count),
+           pct_total = ifelse(is.na(pct_total),0,pct_total))
+```
+
+- Produce a new dataframe with sum of wildfire-induced events
+```{r}
+df_cnt_pct_wf_induced <- df_cnt_pct_type %>%
+    filter(type %in% c("Wildfire","PSPS")) %>%
+    group_by(County) %>%
+    summarise(type = "Wildfire-Induced",
+              count = sum(count),
+              total_count = first(total_count),
+              pct_total = sum(pct_total))
+```
+
+- Attach it to `df_cnt_pct_type`
+```{r}
+df_cnt_pct_type <- bind_rows(df_cnt_pct_type,
+                             df_cnt_pct_wf_induced)
 ```
 
 ```{r}
 write_csv(df_cnt_pct_type, here("result","county-aggregation-results",
                                 "county-poweroutage-count-type-pct-2017-2020.csv"))
+
+write_csv(df_cnt_pct_type %>%
+              filter(type ==  "PSPS"), 
+          here("result","county-aggregation-results",
+                                "county-poweroutage-count-type-pct-psps-2017-2020.csv"))
+
+write_csv(df_cnt_pct_type %>%
+              filter(type == "Wildfire"), 
+          here("result","county-aggregation-results",
+                                "county-poweroutage-count-type-pct-wildfire-only-2017-2020.csv"))
+
+write_csv(df_cnt_pct_type %>%
+              filter(type == "Not Wildfire-induced"), 
+          here("result","county-aggregation-results",
+                                "county-poweroutage-count-type-pct-not-wildfire-2017-2020.csv"))
+
+write_csv(df_cnt_pct_type %>%
+              filter(type == "Wildfire-Induced"), 
+          here("result","county-aggregation-results",
+                                "county-poweroutage-count-type-pct-wildfire-induced-2017-2020.csv"))
 ```
 
 

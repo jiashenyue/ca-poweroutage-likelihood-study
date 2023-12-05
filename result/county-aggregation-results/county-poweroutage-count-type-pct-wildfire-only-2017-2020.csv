@@ -1,0 +1,59 @@
+County,type,count,total_count,pct_total
+Alameda,Wildfire,2,79,2.53
+Alpine,Wildfire,0,15,0
+Amador,Wildfire,0,91,0
+Butte,Wildfire,5,139,3.5999999999999996
+Calaveras,Wildfire,0,84,0
+Colusa,Wildfire,0,20,0
+Contra Costa,Wildfire,1,77,1.3
+Del Norte,Wildfire,0,30,0
+El Dorado,Wildfire,1,178,0.5599999999999999
+Fresno,Wildfire,0,101,0
+Glenn,Wildfire,1,34,2.94
+Humboldt,Wildfire,0,114,0
+Imperial,Wildfire,0,9,0
+Inyo,Wildfire,0,5,0
+Kern,Wildfire,2,165,1.21
+Kings,Wildfire,0,60,0
+Lake,Wildfire,2,79,2.53
+Lassen,Wildfire,0,17,0
+Los Angeles,Wildfire,6,29,20.69
+Madera,Wildfire,0,90,0
+Marin,Wildfire,1,130,0.77
+Mariposa,Wildfire,2,50,4
+Mendocino,Wildfire,1,96,1.04
+Merced,Wildfire,0,94,0
+Modoc,Wildfire,0,1,0
+Mono,Wildfire,1,41,2.44
+Monterey,Wildfire,1,177,0.5599999999999999
+Napa,Wildfire,4,134,2.9899999999999998
+Nevada,Wildfire,0,103,0
+Orange,Wildfire,2,22,9.09
+Placer,Wildfire,0,110,0
+Plumas,Wildfire,2,43,4.65
+Riverside,Wildfire,4,73,5.48
+Sacramento,Wildfire,0,43,0
+San Benito,Wildfire,0,18,0
+San Bernardino,Wildfire,2,110,1.82
+San Diego,Wildfire,4,34,11.76
+San Francisco,Wildfire,0,61,0
+San Joaquin,Wildfire,2,82,2.44
+San Luis Obispo,Wildfire,1,125,0.8
+San Mateo,Wildfire,3,94,3.19
+Santa Barbara,Wildfire,0,168,0
+Santa Clara,Wildfire,2,80,2.5
+Santa Cruz,Wildfire,2,177,1.13
+Shasta,Wildfire,3,114,2.63
+Sierra,Wildfire,1,50,2
+Siskiyou,Wildfire,1,60,1.67
+Solano,Wildfire,0,136,0
+Sonoma,Wildfire,5,158,3.16
+Stanislaus,Wildfire,0,17,0
+Sutter,Wildfire,0,27,0
+Tehama,Wildfire,1,92,1.09
+Trinity,Wildfire,0,19,0
+Tulare,Wildfire,1,113,0.88
+Tuolumne,Wildfire,1,103,0.97
+Ventura,Wildfire,10,142,7.04
+Yolo,Wildfire,1,90,1.11
+Yuba,Wildfire,1,64,1.5599999999999998

@@ -1,0 +1,59 @@
+County,type,count,total_count,pct_total
+Alameda,Not Wildfire-induced,77,79,97.47
+Alpine,Not Wildfire-induced,13,15,86.67
+Amador,Not Wildfire-induced,90,91,98.9
+Butte,Not Wildfire-induced,127,139,91.36999999999999
+Calaveras,Not Wildfire-induced,80,84,95.24000000000001
+Colusa,Not Wildfire-induced,15,20,75
+Contra Costa,Not Wildfire-induced,76,77,98.7
+Del Norte,Not Wildfire-induced,30,30,100
+El Dorado,Not Wildfire-induced,172,178,96.63000000000001
+Fresno,Not Wildfire-induced,100,101,99.00999999999999
+Glenn,Not Wildfire-induced,29,34,85.28999999999999
+Humboldt,Not Wildfire-induced,113,114,99.11999999999999
+Imperial,Not Wildfire-induced,9,9,100
+Inyo,Not Wildfire-induced,5,5,100
+Kern,Not Wildfire-induced,158,165,95.76
+Kings,Not Wildfire-induced,60,60,100
+Lake,Not Wildfire-induced,75,79,94.94
+Lassen,Not Wildfire-induced,17,17,100
+Los Angeles,Not Wildfire-induced,22,29,75.86
+Madera,Not Wildfire-induced,89,90,98.89
+Marin,Not Wildfire-induced,126,130,96.92
+Mariposa,Not Wildfire-induced,47,50,94
+Mendocino,Not Wildfire-induced,92,96,95.83
+Merced,Not Wildfire-induced,93,94,98.94
+Modoc,Not Wildfire-induced,1,1,100
+Mono,Not Wildfire-induced,39,41,95.12
+Monterey,Not Wildfire-induced,176,177,99.44
+Napa,Not Wildfire-induced,122,134,91.03999999999999
+Nevada,Not Wildfire-induced,99,103,96.12
+Orange,Not Wildfire-induced,19,22,86.36
+Placer,Not Wildfire-induced,103,110,93.64
+Plumas,Not Wildfire-induced,40,43,93.02
+Riverside,Not Wildfire-induced,68,73,93.15
+Sacramento,Not Wildfire-induced,43,43,100
+San Benito,Not Wildfire-induced,18,18,100
+San Bernardino,Not Wildfire-induced,106,110,96.36
+San Diego,Not Wildfire-induced,25,34,73.53
+San Francisco,Not Wildfire-induced,61,61,100
+San Joaquin,Not Wildfire-induced,80,82,97.56
+San Luis Obispo,Not Wildfire-induced,124,125,99.2
+San Mateo,Not Wildfire-induced,90,94,95.74000000000001
+Santa Barbara,Not Wildfire-induced,168,168,100
+Santa Clara,Not Wildfire-induced,78,80,97.5
+Santa Cruz,Not Wildfire-induced,174,177,98.31
+Shasta,Not Wildfire-induced,105,114,92.11
+Sierra,Not Wildfire-induced,45,50,90
+Siskiyou,Not Wildfire-induced,58,60,96.67
+Solano,Not Wildfire-induced,132,136,97.06
+Sonoma,Not Wildfire-induced,145,158,91.77
+Stanislaus,Not Wildfire-induced,17,17,100
+Sutter,Not Wildfire-induced,27,27,100
+Tehama,Not Wildfire-induced,87,92,94.57
+Trinity,Not Wildfire-induced,17,19,89.47
+Tulare,Not Wildfire-induced,112,113,99.11999999999999
+Tuolumne,Not Wildfire-induced,101,103,98.06
+Ventura,Not Wildfire-induced,123,142,86.61999999999999
+Yolo,Not Wildfire-induced,87,90,96.67
+Yuba,Not Wildfire-induced,60,64,93.75

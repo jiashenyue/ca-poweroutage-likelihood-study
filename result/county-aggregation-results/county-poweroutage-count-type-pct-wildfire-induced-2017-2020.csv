@@ -1,0 +1,59 @@
+County,type,count,total_count,pct_total
+Alameda,Wildfire-Induced,2,79,2.53
+Alpine,Wildfire-Induced,2,15,13.33
+Amador,Wildfire-Induced,1,91,1.0999999999999999
+Butte,Wildfire-Induced,12,139,8.64
+Calaveras,Wildfire-Induced,4,84,4.760000000000001
+Colusa,Wildfire-Induced,5,20,25
+Contra Costa,Wildfire-Induced,1,77,1.3
+Del Norte,Wildfire-Induced,0,30,0
+El Dorado,Wildfire-Induced,6,178,3.37
+Fresno,Wildfire-Induced,1,101,0.9900000000000001
+Glenn,Wildfire-Induced,5,34,14.7
+Humboldt,Wildfire-Induced,1,114,0.88
+Imperial,Wildfire-Induced,0,9,0
+Inyo,Wildfire-Induced,0,5,0
+Kern,Wildfire-Induced,7,165,4.24
+Kings,Wildfire-Induced,0,60,0
+Lake,Wildfire-Induced,4,79,5.06
+Lassen,Wildfire-Induced,0,17,0
+Los Angeles,Wildfire-Induced,7,29,24.14
+Madera,Wildfire-Induced,1,90,1.11
+Marin,Wildfire-Induced,4,130,3.08
+Mariposa,Wildfire-Induced,3,50,6
+Mendocino,Wildfire-Induced,4,96,4.16
+Merced,Wildfire-Induced,1,94,1.06
+Modoc,Wildfire-Induced,0,1,0
+Mono,Wildfire-Induced,2,41,4.88
+Monterey,Wildfire-Induced,1,177,0.5599999999999999
+Napa,Wildfire-Induced,12,134,8.96
+Nevada,Wildfire-Induced,4,103,3.88
+Orange,Wildfire-Induced,3,22,13.64
+Placer,Wildfire-Induced,7,110,6.36
+Plumas,Wildfire-Induced,3,43,6.98
+Riverside,Wildfire-Induced,5,73,6.8500000000000005
+Sacramento,Wildfire-Induced,0,43,0
+San Benito,Wildfire-Induced,0,18,0
+San Bernardino,Wildfire-Induced,4,110,3.64
+San Diego,Wildfire-Induced,9,34,26.47
+San Francisco,Wildfire-Induced,0,61,0
+San Joaquin,Wildfire-Induced,2,82,2.44
+San Luis Obispo,Wildfire-Induced,1,125,0.8
+San Mateo,Wildfire-Induced,4,94,4.25
+Santa Barbara,Wildfire-Induced,0,168,0
+Santa Clara,Wildfire-Induced,2,80,2.5
+Santa Cruz,Wildfire-Induced,3,177,1.69
+Shasta,Wildfire-Induced,9,114,7.89
+Sierra,Wildfire-Induced,5,50,10
+Siskiyou,Wildfire-Induced,2,60,3.34
+Solano,Wildfire-Induced,4,136,2.94
+Sonoma,Wildfire-Induced,13,158,8.219999999999999
+Stanislaus,Wildfire-Induced,0,17,0
+Sutter,Wildfire-Induced,0,27,0
+Tehama,Wildfire-Induced,5,92,5.4399999999999995
+Trinity,Wildfire-Induced,2,19,10.530000000000001
+Tulare,Wildfire-Induced,1,113,0.88
+Tuolumne,Wildfire-Induced,2,103,1.94
+Ventura,Wildfire-Induced,19,142,13.379999999999999
+Yolo,Wildfire-Induced,3,90,3.33
+Yuba,Wildfire-Induced,4,64,6.249999999999999
