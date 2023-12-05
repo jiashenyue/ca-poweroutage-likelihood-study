@@ -125,6 +125,10 @@ df_cnt_pct_type <- df_outage %>%
     summarise(count = n()) %>%
     left_join(df_cnt_pct_type_sum, by = c("County")) %>%
     mutate(pct_total = round(count/total_count,4)*100)
+
+df_cnt_pct_type <- df_cnt_pct_type %>%
+    expand(nesting(type),
+           count, pct_total)
 ```
 
 ```{r}
