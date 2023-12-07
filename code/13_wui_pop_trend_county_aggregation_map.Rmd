@@ -1,0 +1,76 @@
+---
+title: "Aggregate WUI population change data to county level"
+output: html_notebook
+---
+
+This notebook aggregates population change in WUI census tracts to the county level.
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(hrbrthemes)
+library(classInt)
+library(stringr)
+```
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+## Obtain WUI population change data
+
+- Data from 2010 to 2021
+```{r}
+df_pop_trend <- read_csv(here("data_private",
+                              "pop_trend_2010_2021_WUI_tracts_type.csv"))
+head(df_pop_trend)
+```
+
+- Basic stats without filtering `df_pop_trend`
+```{r}
+df_pop_trend_cnty_agg <- df_pop_trend %>%
+    group_by(county) %>%
+    summarise(med_mk_pop = median(mk_pop),
+              med_slp_pop = median(slp_pop),
+              avg_mk_pop = mean(mk_pop),
+              avg_slp_pop = mean(slp_pop),
+              cnt = n())
+head(df_pop_trend_cnty_agg)
+```
+
+- Basic stats after filtering to significant results only for `df_pop_trend`
+```{r}
+df_pop_trend_cnty_agg_sig <- df_pop_trend %>%
+    filter(pval_mk < 0.05) %>%
+    group_by(county) %>%
+    summarise(med_mk_pop = median(mk_pop),
+              med_slp_pop = median(slp_pop),
+              avg_mk_pop = mean(mk_pop),
+              avg_slp_pop = mean(slp_pop),
+              cnt_sign = n())
+
+```
+
+```{r}
+df_pop_trend_cnty_agg_sig_upd <- df_pop_trend_cnty_agg %>%
+    # select(county, cnt) %>%
+    left_join(df_pop_trend_cnty_agg_sig, by = c("county"),
+              suffix = c("","_sign")) %>%
+    mutate(cnt_sign = ifelse(is.na(cnt_sign),0,cnt_sign),
+           pct_sign = round(cnt_sign/cnt,2)*100,
+           county_name = substr(county,1,nchar(county)-nchar(' County')))
+```
+
+## Write out results
+
+```{r}
+write_csv(df_pop_trend_cnty_agg_sig_upd,
+          here("data_private","pop_trend_2010_2021_WUI_county.csv"))
+```
