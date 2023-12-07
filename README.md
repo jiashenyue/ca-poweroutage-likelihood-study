@@ -90,7 +90,16 @@ Ambient power outages occur often and not all of them are qualified as a power o
 
 ## Wildfire-induced power outages at county level
 
-- [CSV file for county-level power outage events](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/county-outage-events-by-type.csv) with `type` equals to
+- Power outages that are wildfire-induced
+
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/06_county_pct_power_outage_events.png)
+
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/07_county_pct_power_outage_events_wui_highlight.png)
+
+- Area of WUI and its relationship with number and % of customers out of power
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/08_wui_area_customers_out_of_power.png)
+
+- [CSV file for county-level power outage events](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/result/county-aggregation-results/county-poweroutage-count-type-pct-2017-2020.csv) with `type` equals to
   - `Not Wildfire-induced`
   - `Wildfire`
   - `PSPS`
