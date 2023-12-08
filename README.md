@@ -103,3 +103,8 @@ Ambient power outages occur often and not all of them are qualified as a power o
   - `Not Wildfire-induced`
   - `Wildfire`
   - `PSPS`
+## % Area in WUI and population trend inside each county's WUI
+- [CSV file for aggregated population trend inside WUI](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/data_private/pop_trend_2010_2021_WUI_county.csv)
+- [CSV file for original population trend in all WUI census tracts](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/data_private/pop_trend_2010_2021_WUI_tracts_type.csv)
+
+![img](https://github.com/jiashenyue/ca-poweroutage-likelihood-study/blob/main/plot/09_pop_trend_wui_area_customers_out_of_power.png)
