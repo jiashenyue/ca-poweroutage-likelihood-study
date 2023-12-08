@@ -1,0 +1,330 @@
+---
+title: "Visualize emPOWER data"
+author: Shenyue Jia
+output: html_notebook
+---
+
+This notebook creates several visualizations for emPOWER data from 2017 to 2022
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(zoo)
+library(foreign)
+library(here)
+library(purrr)
+library(lubridate)
+library(ggthemes)
+library(hrbrthemes)
+library(classInt)
+library(stringr)
+```
+
+- Clean workspace
+```{r}
+rm(list = ls())
+```
+
+## Read emPOWER data
+
+```{r}
+df_medicare <- read_csv(here("data_private","emPOWER",
+                             "medicare_bene_long_form_2017_2022.csv")) %>%
+    mutate(month_year = my(paste(month,year,sep = "-")))
+
+df_dme <- read_csv(here("data_private","emPOWER",
+                   "dme_long_form_2017_2022.csv")) %>%
+    mutate(month_year = my(paste(month,year,sep = "-")))
+```
+
+## Generate calendar heatmap
+
+- Prepare a function to create beautiful breaks
+```{r}
+  caculate_class <- function(var,nclass){
+    # library(plyr)
+    class_brks <- classIntervals(var, n = nclass,intervalClosure = "left",
+                                 style = "pretty")
+    # class <- round_any(class_brks$brks,5)
+    class <- class_brks$brks
+    
+    return(class)
+  }
+```
+
+
+- Aggregate data to California
+```{r}
+df_medicare_agg <- df_medicare %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct()
+head(df_medicare_agg)
+```
+
+- Create aggregated version of data for DME users
+```{r}
+df_dme_agg <- df_dme %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct()
+head(df_dme_agg)
+```
+
+## Plot DME users
+
+- Create a step chart for aggregated DME users
+
+```{r}
+df_dme_agg %>%
+  ggplot(aes(x=month_year, y= value)) + 
+  geom_step()+
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month",
+             date_labels = "%Y") +
+  scale_y_continuous(name = "Number of DME users",
+                     breaks = caculate_class(df_dme_agg$value,4),
+                     labels = format(caculate_class(df_dme_agg$value,4),
+                                     big.mark = ","))+
+  # scale_y_reverse()+
+  theme_ipsum()+
+  theme(
+      axis.title.x = element_blank(),
+        # axis.title.y = element_blank(),
+        panel.grid.minor = element_line(color = "#f0f0f0",size = 0.1),
+        panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
+  ggtitle("Change of Number of DME users in California") -> dme_stepchart
+
+dme_stepchart
+```
+
+- Save the stepchart
+```{r}
+ggsave(
+  here("plot","11_ca_dme_stepchart.png"),
+  dme_stepchart,
+  # device = cairo_pdf,
+  width = 9,
+  height = 6,
+  scale = 1
+)
+```
+
+## Combo stepcharts with Medicare and DME users
+
+- Create a new dataframe for both metrics
+```{r}
+df_dme_agg <- df_dme_agg %>%
+    left_join(df_medicare_agg, by = "month_year",
+              suffix = c("","_medicare")) %>%
+    mutate(pct_dme_medicare = round(value/value_medicare,4)*100) %>%
+    select(-value_medicare,-month_medicare, -year_medicare,
+           -month_num_medicare)
+head(df_dme_agg)
+```
+
+- Create a stepchart
+
+```{r}
+df_dme_agg %>%
+  ggplot(aes(x=month_year, y= pct_dme_medicare)) + 
+  geom_step()+
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month",
+             date_labels = "%Y") +
+  scale_y_continuous(name = "%DME users in Medicare Beneficiaries",
+                     breaks = caculate_class(df_dme_agg$pct_dme_medicare,4),
+                     labels = format(caculate_class(df_dme_agg$pct_dme_medicare,4),
+                                     big.mark = ","))+
+  # scale_y_reverse()+
+  theme_ipsum()+
+  theme(
+      axis.title.x = element_blank(),
+        # axis.title.y = element_blank(),
+        panel.grid.minor = element_line(color = "#f0f0f0",size = 0.1),
+        panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
+  ggtitle("Change of %DME users in Medicares of California") -> pctdme_stepchart
+
+pctdme_stepchart
+```
+
+- Save the stepchart
+```{r}
+ggsave(
+  here("plot","12_ca_dme_pct_stepchart.png"),
+  pctdme_stepchart,
+  # device = cairo_pdf,
+  width = 9,
+  height = 6,
+  scale = 1
+)
+```
+
+## DME users in counties deemed high area of WUI
+
+- Define counties deemed high area of WUI
+```{r}
+high_wui_counties <- read_csv(here("data_private","wui_county_more_than10pct.csv"))
+names_high_wui <- high_wui_counties$NAME
+```
+
+- Develop aggregation for selected counties
+```{r}
+df_dme_agg_high_wui <- df_dme %>%
+    filter(County %in% names_high_wui) %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct() %>%
+    ungroup() %>%
+    mutate(type = "High in WUI")
+head(df_dme_agg_high_wui)
+```
+
+```{r}
+df_dme_agg_not_high_wui <- df_dme %>%
+    filter(!(County %in% names_high_wui)) %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct() %>%
+    ungroup() %>%
+    mutate(type = "Not High in WUI")
+head(df_dme_agg_not_high_wui)
+```
+
+
+- Combine these two dataframes together
+```{r}
+df_dme_agg_wui_info <- bind_rows(
+    df_dme_agg_high_wui,
+    df_dme_agg_not_high_wui
+)
+```
+
+- Calculate Medicare beneficiaries in high WUI counties
+```{r}
+df_medicare_agg_high_wui <- df_medicare %>%
+    filter(County %in% names_high_wui) %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct() %>%
+    ungroup() %>%
+    mutate(type = "High in WUI")
+head(df_medicare_agg_high_wui)
+```
+
+
+- Calculate Medicare beneficiaries in not high WUI counties
+```{r}
+df_medicare_agg_not_high_wui <- df_medicare %>%
+    filter(!(County %in% names_high_wui)) %>%
+    group_by(month_year) %>%
+    summarise(value = sum(value),
+           month = format(month_year,"%b"),
+           year = as.numeric(format(month_year,"%Y")),
+           month_num = format(month_year, "%m")) %>%
+    distinct() %>%
+    ungroup() %>%
+    mutate(type = "Not High in WUI")
+head(df_medicare_agg_not_high_wui)
+```
+
+- Combine these two dataframes
+```{r}
+df_medicare_agg_wui_info <- bind_rows(
+    df_medicare_agg_high_wui,
+    df_medicare_agg_not_high_wui
+)
+```
+
+- Calculate percentage of DME users in the selected counties
+```{r}
+df_dme_agg_high_wui <- df_dme_agg_high_wui %>%
+    left_join(df_medicare_agg_high_wui, by = "month_year",
+              suffix = c("","_medicare")) %>%
+    mutate(pct_dme_medicare = round(value/value_medicare,4)*100) %>%
+    select(-value_medicare,-month_medicare, -year_medicare,
+           -month_num_medicare)
+head(df_dme_agg_high_wui)
+```
+
+- Make a stepchart for `df_dme_agg_wui_info`
+```{r}
+df_dme_agg_wui_info %>%
+  ggplot(aes(x=month_year, y= value, group(type))) + 
+  geom_step(aes(color = type))+
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month",
+             date_labels = "%Y") +
+  scale_y_continuous(name = "DME users in Medicare Beneficiaries",
+                     breaks = caculate_class(df_dme_agg_wui_info$value,4),
+                     labels = format(caculate_class(df_dme_agg_wui_info$value,4),
+                                     big.mark = ","))+
+  scale_color_discrete(name = "Counties")+
+  theme_ipsum()+
+  theme(
+      axis.title.x = element_blank(),
+        # axis.title.y = element_blank(),
+        panel.grid.minor = element_line(color = "#f0f0f0",size = 0.1),
+        panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
+  ggtitle("Change of DME users in California") -> dme_wui_stepchart
+
+dme_wui_stepchart
+```
+
+- Make a stepchart for `df_medicare_agg_wui_info`
+```{r}
+df_medicare_agg_wui_info %>%
+  ggplot(aes(x=month_year, y= value, group(type))) + 
+  geom_step(aes(color = type))+
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month",
+             date_labels = "%Y") +
+  scale_y_continuous(name = "Medicare Beneficiaries",
+                     breaks = caculate_class(df_medicare_agg_wui_info$value,4),
+                     labels = format(caculate_class(df_medicare_agg_wui_info$value,4),
+                                     big.mark = ","))+
+  scale_color_discrete(name = "Counties")+
+  theme_ipsum()+
+  theme(
+      axis.title.x = element_blank(),
+        # axis.title.y = element_blank(),
+        panel.grid.minor = element_line(color = "#f0f0f0",size = 0.1),
+        panel.grid.major = element_line(color = "#cccccc",size = 0.1))+
+  ggtitle("Change of Medicare Beneficiaries in California") -> medicare_bene_wui_stepchart
+
+medicare_bene_wui_stepchart
+```
+
+- Save to PNG files
+```{r}
+ggsave(
+  here("plot","13_ca_dme_wui_compare_stepchart.png"),
+  dme_wui_stepchart,
+  # device = cairo_pdf,
+  width = 6,
+  height = 4,
+  scale = 1
+)
+```
+
+```{r}
+ggsave(
+  here("plot","14_ca_medicare_wui_compare_stepchart.png"),
+  medicare_bene_wui_stepchart,
+  # device = cairo_pdf,
+  width = 6,
+  height = 4,
+  scale = 1
+)
+```
