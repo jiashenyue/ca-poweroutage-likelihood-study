@@ -5,7 +5,7 @@ output: html_notebook
 ---
 
 ## Introduction
-- This notebook produce a dataset with a new flag field to identify if a power outage event at the CDP levelis wildfire-induced.
+- This notebook produce a dataset with a new flag field to identify if a power outage event at the CDP level is wildfire-induced.
 - Wildfire-induced power outages
     - Directly caused by wildfire progression
     - Caused by Public Safety Power Shutoffs (PSPS)

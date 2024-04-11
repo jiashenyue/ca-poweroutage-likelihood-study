@@ -135,7 +135,7 @@ generate_tile_plot_df <- function(long_form,customers_out,curr_total_hh){
       mutate(CustomerThres = param_grid$c_out[i])
     
     # Calculate % of total housing units who have experienced power outage
-    # Calculte % of time of the year when a power outage have occurred
+    # Calculte % of time of the year (60*24*365) when a power outage have occurred
     curr_ts <- curr_ts %>%
       mutate(PctHU = SegCustomerOut/curr_total_hh*100,
              PctTime = Duration/525600*100,

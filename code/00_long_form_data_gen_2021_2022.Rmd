@@ -1,0 +1,55 @@
+---
+title: "Prepare long forms of power outage data (2021-2022)"
+author: "Shenyue Jia"
+output: html_notebook
+---
+
+
+This notebook shows how to convert the original dataset purchased from poweroutage.us to long forms by county and city.
+
+```{r setup, warning=FALSE}
+# loading libraries
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(foreign)
+library(here)
+library(bayestestR)
+```
+
+# Read original poweroutage.us CSV files
+
+```{r}
+rm(list = ls())
+```
+
+- Unzip file
+
+```{r}
+ca_data <- read_csv(unzip(here("data_private",
+                               "POUS_export_citybyutility_Raw_US_2021_2022.zip"),
+                          "POUS_export_citybyutility_Raw_US_2021_2022.csv"))
+
+# ca_data <- read_csv(here("data_private",
+#                     "POUS_export_countybyutility_Raw_US_20220101_20221231.csv")) %>%
+#     filter(StateName == "California")
+
+head(ca_data)
+```
+
+- Read CSV file instead
+```{r}
+us_data_city <- read_csv(here("data_private",
+                         "POUS_export_citybyutility_Raw_US_2021_2022_UTF8.csv"))
+head(us_data_city)
+```
+
+- Check distinct values in `RecordedDateTime`
+```{r}
+us_data_city_dates <- us_data_city %>%
+    distinct(RecordedDateTime)
+```
+
+```{r}
+tail(us_data_city_dates)
+```
