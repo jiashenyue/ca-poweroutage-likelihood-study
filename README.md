@@ -1,6 +1,6 @@
 # Likelihood of experiencing a wildfire-induced power outage in California
 
-Shenyue Jia | Initiatied on 11/22/2023
+Shenyue Jia
 
 - A study on the likelihood of experiencing a wildfire-induced power outage in California
 - This work is an extension based on a [previous analysis](https://github.com/jiashenyue/ca-poweroutage-medical-vulnerable-pop/blob/main/README.md) focusing on the 2019 power outage events in California
@@ -56,8 +56,7 @@ Ambient power outages occur often and not all of them are qualified as a power o
 - [x] Some events are very long; need to check if this is related to any irregulars in the long-form data
   - Example: The longest power outage event at county level for `Alameda County` lasted for `78510` min from `2020-09-03T22:20:00Z` to `2020-10-28T10:49:59Z`
     - This issue has been fixed by correctly applying the 0.5% customer threshold while cleaning the noise in the long-form time series
-- [ ] Using the current power outage definition, there are too few power outages at the **City** level
-- [ ] **None** of the wildfire or PSPS information matches the city-level outage events
+- [x] Using the current power outage definition, there are too few power outages at the **City** level
 
 
 ### Other known issues
